@@ -83,15 +83,6 @@
       "title": "Profile configurations",
       "mode": "working",
       "section": [
-        {
-          "title": "Household profile configuration",
-          "focus": {
-            "reference": "Binary/truecover-household-profile-config",
-            "identifier": {
-              "value": "householdProfile"
-            }
-          }
-        }
       ]
     },
     {

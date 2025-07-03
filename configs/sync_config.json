@@ -9,8 +9,7 @@
         "code": "_id",
         "base": [
           "QuestionnaireResponse",
-          "Group",
-          "List"
+          "Task"
         ]
       }
     },
@@ -35,7 +34,7 @@
           "LocationHierarchy"
         ],
         "type": "special",
-        "expression": "4"
+        "expression": "5"
       }
     },
     {
@@ -47,7 +46,7 @@
           "LocationHierarchy"
         ],
         "type": "special",
-        "expression": "4"
+        "expression": "5"
       }
     },
     {
@@ -69,8 +68,7 @@
         "code": "_count",
         "base": [
           "QuestionnaireResponse",
-          "Group",
-          "List"
+          "Task"
         ],
         "type": "token",
         "expression": "#count"
