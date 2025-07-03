@@ -1,0 +1,104 @@
+{
+  "appId": "truecover",
+  "configType": "navigation",
+  "menuActionButton": {
+    "id": "n/a",
+    "display": "N/A",
+    "visible": false
+  },
+  "clientRegisters": [
+    {
+      "id": "taskRegister",
+      "display": "{{ tasks }}",
+      "menuIconConfig": {
+        "type": "local",
+        "reference": "ic_home"
+      },
+      "showCount": true,
+      "actions": [
+        {
+          "trigger": "ON_CLICK",
+          "workflow": "LAUNCH_REGISTER",
+          "id": "taskRegister"
+        },
+        {
+          "trigger": "ON_COUNT",
+          "id": "taskRegister"
+        }
+      ]
+    }
+  ],
+  "staticMenu": [
+    {
+      "id": "location",
+      "visible": true,
+      "display": "{{ select.location }}",
+      "menuIconConfig": {
+        "type": "local",
+        "reference": "ic_location"
+      },
+      "actions": [
+        {
+          "trigger": "ON_CLICK",
+          "workflow": "LAUNCH_LOCATION_SELECTOR",
+          "display": "{{ set.location.sync }}",
+          "multiSelectViewConfig": {
+            "resourceConfig": {
+              "baseResource": {
+                "resource": "Location",
+                "dataQueries": [
+                  {
+                    "paramName": "type",
+                    "operation": "OR",
+                    "filterCriteria": [
+                      {
+                        "dataType": "CODE",
+                        "value": {
+                          "system": "https://smartregister.org/codes/administrative-level",
+                          "code": "2"
+                        }
+                      },
+                      {
+                        "dataType": "CODE",
+                        "value": {
+                          "system": "https://smartregister.org/codes/administrative-level",
+                          "code": "3"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "parentIdFhirPathExpression": "Location.partOf.reference",
+            "contentFhirPathExpression": "Location.name",
+            "rootNodeFhirPathExpression": {
+              "key": "Location.type.coding.where(system='https://smartregister.org/codes/administrative-level').code",
+              "value": "2"
+            },
+            "viewActions": [
+              "SYNC_DATA"
+            ],
+            "mutuallyExclusive": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "visible": true,
+      "display": "{{ settings }}",
+      "menuIconConfig": {
+        "type": "local",
+        "reference": "ic_settings"
+      },
+      "actions": [
+        {
+          "trigger": "ON_CLICK",
+          "workflow": "LAUNCH_SETTINGS",
+          "id": "navigateToSettingsScreen"
+        }
+      ]
+    }
+  ]
+}
