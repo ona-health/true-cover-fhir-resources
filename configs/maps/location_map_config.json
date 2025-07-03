@@ -188,5 +188,67 @@
       "status": "@{status}"
     }
   },
-  "filterDataByRelatedEntityLocation": true
+  "topScreenSection": {
+    "title": "{{ households.map }}",
+    "searchBar": {
+      "visible": true,
+      "display": "{{ search.by.location.name  }}",
+      "computedRules": [
+        "name"
+      ]
+    },
+    "menuIcons": [
+      {
+        "viewType": "IMAGE",
+        "imageConfig": {
+          "type": "local",
+          "reference": "ic_filter"
+        },
+        "actions": [
+          {
+            "trigger": "ON_CLICK",
+            "workflow": "LAUNCH_LOCATION_SELECTOR",
+            "display": "{{ set.location.filter }}",
+            "multiSelectViewConfig": {
+              "resourceConfig": {
+                "baseResource": {
+                  "resource": "Location",
+                  "dataQueries": [
+                    {
+                      "paramName": "type",
+                      "operation": "OR",
+                      "filterCriteria": [
+                        {
+                          "dataType": "CODE",
+                          "value": {
+                            "system": "https://smartregister.org/codes/administrative-level",
+                            "code": "2"
+                          }
+                        },
+                        {
+                          "dataType": "CODE",
+                          "value": {
+                            "system": "https://smartregister.org/codes/administrative-level",
+                            "code": "3"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "parentIdFhirPathExpression": "Location.partOf.reference",
+              "contentFhirPathExpression": "Location.name",
+              "rootNodeFhirPathExpression": {
+                "key": "Location.type.coding.where(system='https://smartregister.org/codes/administrative-level').code",
+                "value": "2"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "filterDataByRelatedEntityLocation": true,
+  "filterDataByLocationLineage": true
 }
