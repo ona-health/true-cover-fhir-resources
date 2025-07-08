@@ -1,0 +1,40 @@
+{
+  "resourceType": "List",
+  "id": "hh-location-hierarchy-list",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "hh-location-hierarchy"
+    }
+  ],
+  "status": "current",
+  "mode": "working",
+  "title": "Households",
+  "code": {
+    "coding": [
+      {
+        "system": "http://ona.io",
+        "code": "households",
+        "display": "Households"
+      }
+    ],
+    "text": "House Holds"
+  },
+  "entry": [
+    {
+      "item": {
+        "reference": "Location/62851f8a-7a41-46b1-88ab-a9cbdb73c997"
+      }
+    },
+    {
+      "item": {
+        "reference": "Location/d5be5731-462f-497b-890f-a2d7193bc293"
+      }
+    },
+    {
+      "item": {
+        "reference": "Location/2514c212-7096-4ba4-ae75-b1a1b8c75768"
+      }
+    }
+  ]
+}

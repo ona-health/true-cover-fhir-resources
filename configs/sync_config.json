@@ -1,0 +1,78 @@
+{
+  "resourceType": "Parameters",
+  "configType": "sync",
+  "parameter": [
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "name": "_id",
+        "code": "_id",
+        "base": [
+          "QuestionnaireResponse",
+          "Task"
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "name": "mode",
+        "code": "mode",
+        "base": [
+          "LocationHierarchy"
+        ],
+        "type": "special",
+        "expression": "list"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "name": "administrativeLevelMin",
+        "code": "administrativeLevelMin",
+        "base": [
+          "LocationHierarchy"
+        ],
+        "type": "special",
+        "expression": "5"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "name": "administrativeLevelMax",
+        "code": "administrativeLevelMax",
+        "base": [
+          "LocationHierarchy"
+        ],
+        "type": "special",
+        "expression": "5"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "name": "filter_mode_lineage",
+        "code": "filter_mode_lineage",
+        "base": [
+          "LocationHierarchy"
+        ],
+        "type": "special",
+        "expression": "true"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "name": "count",
+        "code": "_count",
+        "base": [
+          "QuestionnaireResponse",
+          "Task"
+        ],
+        "type": "token",
+        "expression": "#count"
+      }
+    }
+  ]
+}

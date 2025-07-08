@@ -1,0 +1,32 @@
+{
+  "appId": "truecover",
+  "configType": "application",
+  "theme": "DEFAULT",
+  "appTitle": "TRUE COVER",
+  "remoteSyncPageSize": 100,
+  "dateFormat": "d MMM, h.mm a",
+  "languages": [
+    "en"
+  ],
+  "useDarkTheme": false,
+  "syncInterval": 30,
+  "syncStrategy": [
+    "RelatedEntityLocation"
+  ],
+  "loginConfig": {
+    "showLogo": true,
+    "enablePin": true,
+    "showAppTitle": true,
+    "logoHeight": 240,
+    "logoWidth": 280
+  },
+  "navigationStartDestination": {
+    "launcherType": "MAP",
+    "id": "locationMap",
+    "screenTitle": "Households"
+  },
+  "usePractitionerAssignedLocationOnSync": false,
+  "logGpsLocation": [
+    "CALCULATE_DISTANCE_RULE_EXECUTOR"
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "resourceType": "Composition",
+  "id": "truecover",
+  "identifier": {
+    "use": "official",
+    "value": "truecover"
+  },
+  "status": "final",
+  "type": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "1156600005",
+        "display": "Device setting parameter"
+      }
+    ]
+  },
+  "date": "2025-07-01",
+  "title": "Device configurations",
+  "confidentiality": "L",
+  "section": [
+    {
+      "title": "Application configuration",
+      "focus": {
+        "reference": "Binary/truecover-application-config",
+        "identifier": {
+          "value": "application"
+        }
+      },
+      "mode": "working"
+    },
+    {
+      "title": "Sync configuration",
+      "focus": {
+        "reference": "Binary/truecover-sync-config",
+        "identifier": {
+          "value": "sync"
+        }
+      },
+      "mode": "working"
+    },
+    {
+      "title": "Navigation configuration",
+      "focus": {
+        "reference": "Binary/truecover-navigation-config",
+        "identifier": {
+          "value": "navigation"
+        }
+      },
+      "mode": "working"
+    },
+    {
+      "title": "Register configurations",
+      "mode": "working",
+      "section": [
+        {
+          "title": "Task register configuration",
+          "focus": {
+            "reference": "Binary/truecover-task-register-config",
+            "identifier": {
+              "value": "taskRegister"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Translation configurations",
+      "mode": "working",
+      "section": [
+        {
+          "title": "Translation English",
+          "focus": {
+            "reference": "Binary/truecover-en-strings-config",
+            "identifier": {
+              "value": "strings"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Profile configurations",
+      "mode": "working",
+      "section": [
+      ]
+    },
+    {
+      "title": "GeoWidget configurations",
+      "mode": "working",
+      "section": [
+        {
+          "title": "Location Mapping",
+          "focus": {
+            "reference": "Binary/truecover-location-map-config",
+            "identifier": {
+              "value": "locationMap"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "List",
+      "mode": "working",
+      "section": [
+        {
+          "title": "Households List",
+          "focus": {
+            "reference": "List/hh-location-hierarchy-list",
+            "identifier": {
+              "value": "householdsList"
+            }
+          },
+          "mode": "working"
+        }
+      ]
+    }
+  ]
+}

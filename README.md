@@ -1,2 +1,2 @@
 # true-cover-fhir-resources
-Reposiory for True Cover FHIR resources
+Repository for True Cover FHIR resources
