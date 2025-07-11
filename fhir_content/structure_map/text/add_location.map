@@ -53,5 +53,5 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
                 src -> ref.display = evaluate(parentLoc, $this.answer.value.display)  "r_loc_part_of_display";
             } "r_loc_part_of_ref";
         } "r_parent_location";
-
+    } "r_loc";
 }

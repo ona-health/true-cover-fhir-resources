@@ -3,7 +3,7 @@
   "id": "truecover-add-location-sm",
   "text": {
     "status": "additional",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://hl7.org/fhir/StructureMap/truecover-add-location-sm&quot; = 'True Cover Add Location'\nuses &quot;http://hl7.org/fhir/StructureDefinition/QuestionnaireReponse&quot; as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; as target\n\ngroup AddLocation(source src : QuestionnaireResponse, target bundle: Bundle) {\n    src -&gt; bundle.type = &quot;collection&quot; &quot;r_bundle_type&quot;;\n    src then ExtractLocation(src, bundle)&quot;r_bundle_entries&quot;;\n}\n\ngroup ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;Location&quot;) as loc then {\n    \tsrc -&gt; loc.id = uuid() &quot;r_loc_id&quot;;\n    \tsrc -&gt; loc.status =  &quot;active&quot; &quot;r_loc_status&quot;;\n    \tsrc.item as locName where(linkId=&quot;location-name&quot;) and answer.count()&gt;0 then {\n    \t    src -&gt; loc.name = evaluate(locName, $this.answer.value) &quot;r_loc_name&quot;;\n    \t} &quot;r_loc_name_exists&quot;;\n    \tsrc.item as locLon where(linkId=&quot;positionLongitude&quot;) and answer.count()&gt;0 then {\n    \t    src.item as locLat where(linkId=&quot;positionLatitude&quot;) and answer.count()&gt;0 then {\n                src -&gt; loc.position = create(&quot;Location_Position&quot;) as pos then {\n                    src -&gt; pos.longitude = evaluate(locLon, $this.answer.value)&quot;r_loc_long&quot;;\n                    src -&gt; pos.latitude = evaluate(locLat, $this.answer.value) &quot;r_loc_lat&quot;;\n                } &quot;r_loc_pos&quot;;\n            } &quot;r_loc_lat_exists&quot;;\n        } &quot;r_loc_lon_exists&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_building_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_building_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_building_loc_type_system&quot;;\n                } &quot;r_building_loc_type_coding&quot;;\n        } &quot;r_building_loc_type&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;5&quot; &quot;r_admin_level_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Level 5&quot; &quot;r_admin_level_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;https://smartregister.org/codes/administrative-level&quot; &quot;r_admin_level_loc_type_system&quot;;\n            } &quot;r_admin_level_loc_type_coding&quot;;\n        } &quot;r_admin_level_loc_type_concept&quot;;\n\n        src -&gt; loc.physicalType = create(&quot;CodeableConcept&quot;) as concept then {\n             src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_loc_type_system&quot;;\n            } &quot;r_loc_type_coding&quot;;\n        } &quot;r_loc_type_concept&quot;;\n\n        src -&gt; loc.partOf = create(&quot;Reference&quot;) as ref then {\n            src -&gt; ref.reference = &quot;Location/9625fe78-8954-4031-bacf-d03f048309c2&quot; &quot;r_loc_part_of&quot;;\n            src -&gt; ref.display = &quot;Test Location&quot; &quot;r_loc_part_of_display&quot;;\n        } &quot;r_loc_part_of_ref&quot;;\n    } &quot;r_loc&quot;;\n\n}</pre></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://hl7.org/fhir/StructureMap/truecover-add-location-sm&quot; = 'True Cover Add Location'\nuses &quot;http://hl7.org/fhir/StructureDefinition/QuestionnaireReponse&quot; as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; as target\n\ngroup AddLocation(source src : QuestionnaireResponse, target bundle: Bundle) {\n    src -&gt; bundle.type = &quot;collection&quot; &quot;r_bundle_type&quot;;\n    src then ExtractLocation(src, bundle)&quot;r_bundle_entries&quot;;\n}\n\ngroup ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;Location&quot;) as loc then {\n    \tsrc -&gt; loc.id = uuid() &quot;r_loc_id&quot;;\n    \tsrc -&gt; loc.status =  &quot;active&quot; &quot;r_loc_status&quot;;\n    \tsrc.item as locName where(linkId=&quot;location-name&quot;) and answer.count()&gt;0 then {\n    \t    src -&gt; loc.name = evaluate(locName, $this.answer.value) &quot;r_loc_name&quot;;\n    \t} &quot;r_loc_name_exists&quot;;\n    \tsrc.item as locLon where(linkId=&quot;positionLongitude&quot;) and answer.count()&gt;0 then {\n    \t    src.item as locLat where(linkId=&quot;positionLatitude&quot;) and answer.count()&gt;0 then {\n                src -&gt; loc.position = create(&quot;Location_Position&quot;) as pos then {\n                    src -&gt; pos.longitude = evaluate(locLon, $this.answer.value)&quot;r_loc_long&quot;;\n                    src -&gt; pos.latitude = evaluate(locLat, $this.answer.value) &quot;r_loc_lat&quot;;\n                } &quot;r_loc_pos&quot;;\n            } &quot;r_loc_lat_exists&quot;;\n        } &quot;r_loc_lon_exists&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_building_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_building_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_building_loc_type_system&quot;;\n                } &quot;r_building_loc_type_coding&quot;;\n        } &quot;r_building_loc_type&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;5&quot; &quot;r_admin_level_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Level 5&quot; &quot;r_admin_level_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;https://smartregister.org/codes/administrative-level&quot; &quot;r_admin_level_loc_type_system&quot;;\n            } &quot;r_admin_level_loc_type_coding&quot;;\n        } &quot;r_admin_level_loc_type_concept&quot;;\n\n        src -&gt; loc.physicalType = create(&quot;CodeableConcept&quot;) as concept then {\n             src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_loc_type_system&quot;;\n            } &quot;r_loc_type_coding&quot;;\n        } &quot;r_loc_type_concept&quot;;\n\n        src.item as parentLoc where(linkId=&quot;select-operational-area&quot;) and answer.count()&gt;0 then {\n            src -&gt; loc.partOf = create(&quot;Reference&quot;) as ref then {\n                src -&gt; ref.reference = evaluate(parentLoc, $this.answer.value.reference) &quot;r_loc_part_of&quot;;\n                src -&gt; ref.display = evaluate(parentLoc, $this.answer.value.display)  &quot;r_loc_part_of_display&quot;;\n            } &quot;r_loc_part_of_ref&quot;;\n        } &quot;r_parent_location&quot;;\n    } &quot;r_loc&quot;;\n}</pre></div>"
   },
   "url": "http://hl7.org/fhir/StructureMap/truecover-add-location-sm",
   "name": "True Cover Add Location",
@@ -624,29 +624,18 @@
               ]
             },
             {
-              "name": "r_loc_part_of_ref",
+              "name": "r_parent_location",
               "source": [
                 {
-                  "context": "src"
-                }
-              ],
-              "target": [
-                {
-                  "context": "loc",
-                  "contextType": "variable",
-                  "element": "partOf",
-                  "variable": "ref",
-                  "transform": "create",
-                  "parameter": [
-                    {
-                      "valueString": "Reference"
-                    }
-                  ]
+                  "context": "src",
+                  "element": "item",
+                  "variable": "parentLoc",
+                  "condition": "(linkId = 'select-operational-area') and (answer.count() > 0)"
                 }
               ],
               "rule": [
                 {
-                  "name": "r_loc_part_of",
+                  "name": "r_loc_part_of_ref",
                   "source": [
                     {
                       "context": "src"
@@ -654,34 +643,64 @@
                   ],
                   "target": [
                     {
-                      "context": "ref",
+                      "context": "loc",
                       "contextType": "variable",
-                      "element": "reference",
-                      "transform": "copy",
+                      "element": "partOf",
+                      "variable": "ref",
+                      "transform": "create",
                       "parameter": [
                         {
-                          "valueString": "Location/9625fe78-8954-4031-bacf-d03f048309c2"
+                          "valueString": "Reference"
                         }
                       ]
                     }
-                  ]
-                },
-                {
-                  "name": "r_loc_part_of_display",
-                  "source": [
-                    {
-                      "context": "src"
-                    }
                   ],
-                  "target": [
+                  "rule": [
                     {
-                      "context": "ref",
-                      "contextType": "variable",
-                      "element": "display",
-                      "transform": "copy",
-                      "parameter": [
+                      "name": "r_loc_part_of",
+                      "source": [
                         {
-                          "valueString": "Test Location"
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "ref",
+                          "contextType": "variable",
+                          "element": "reference",
+                          "transform": "evaluate",
+                          "parameter": [
+                            {
+                              "valueId": "parentLoc"
+                            },
+                            {
+                              "valueString": "$this.answer.value.reference"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "r_loc_part_of_display",
+                      "source": [
+                        {
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "ref",
+                          "contextType": "variable",
+                          "element": "display",
+                          "transform": "evaluate",
+                          "parameter": [
+                            {
+                              "valueId": "parentLoc"
+                            },
+                            {
+                              "valueString": "$this.answer.value.display"
+                            }
+                          ]
                         }
                       ]
                     }
