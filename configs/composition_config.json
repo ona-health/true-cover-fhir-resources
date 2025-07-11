@@ -86,6 +86,22 @@
       ]
     },
     {
+      "title": "StructureMaps",
+      "mode": "working",
+      "section": [
+        {
+          "title": "Add Location",
+          "focus": {
+            "reference": "StructureMap/truecover-add-location-sm",
+            "identifier": {
+              "value": "AddLocationSM"
+            }
+          },
+          "mode": "working"
+        }
+      ]
+    },
+    {
       "title": "GeoWidget configurations",
       "mode": "working",
       "section": [
