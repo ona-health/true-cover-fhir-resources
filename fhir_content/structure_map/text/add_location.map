@@ -11,6 +11,26 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
     src -> bundle.entry as entry, entry.resource = create("Location") as loc then {
     	src -> loc.id = uuid() "r_loc_id";
     	src -> loc.status =  "active" "r_loc_status";
+    	src -> loc.meta = create("Meta") as meta then {
+    	    src.item as province where(linkId="select-province") and answer.count()>0 then {
+                src -> meta.tag = create("Coding") as coding then {
+                    src -> coding.code = evaluate(province, $this.answer.value.reference.split("/")[1]) "r_loc_level_1_meta_code";
+                    src -> coding.system = "http://smartregister.org/CodeSystem/location-lineage" "r_loc_level_1_meta_system";
+                } "r_loc_level_1_meta_tag";
+            } "r_loc_level_1_meta_exists";
+            src.item as district where(linkId="select-district") and answer.count()>0 then {
+                src -> meta.tag = create("Coding") as coding then {
+                    src -> coding.code = evaluate(district, $this.answer.value.reference.split("/")[1]) "r_loc_level_2_meta_code";
+                    src -> coding.system = "http://smartregister.org/CodeSystem/location-lineage" "r_loc_level_2_meta_system";
+                } "r_loc_level_2_meta_tag";
+            } "r_loc_level_2_meta_exists";
+            src.item as operationalArea where(linkId="select-operational-area") and answer.count()>0 then {
+                src -> meta.tag = create("Coding") as coding then {
+                    src -> coding.code = evaluate(operationalArea, $this.answer.value.reference.split("/")[1]) "r_loc_level_3_meta_code";
+                    src -> coding.system = "http://smartregister.org/CodeSystem/location-lineage" "r_loc_level_3_meta_system";
+                } "r_loc_level_3_meta_tag";
+            } "r_loc_level_3_meta_exists";
+    	} "r_loc_meta";
     	src.item as locName where(linkId="location-name") and answer.count()>0 then {
     	    src -> loc.name = evaluate(locName, $this.answer.value) "r_loc_name";
     	} "r_loc_name_exists";
