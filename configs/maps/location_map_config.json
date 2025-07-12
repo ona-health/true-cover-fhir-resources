@@ -18,11 +18,27 @@
     }
   ],
   "registrationQuestionnaire": {
-    "id": "",
+    "id": "truecover-add-location",
     "title": "{{ add.household }}",
     "saveButtonText": "{{ save }}",
     "setPractitionerDetails": true,
-    "setOrganizationDetails": true
+    "setOrganizationDetails": true,
+    "extraParams": [
+      {
+        "paramType": "PREPOPULATE",
+        "linkId": "positionLongitude",
+        "dataType": "STRING",
+        "key": "positionLongitude",
+        "value": ""
+      },
+      {
+        "paramType": "PREPOPULATE",
+        "linkId": "positionLatitude",
+        "dataType": "STRING",
+        "key": "positionLatitude",
+        "value": ""
+      }
+    ]
   },
   "resourceConfig": {
     "baseResource": {
@@ -62,7 +78,7 @@
       }
     ]
   },
-  "showAddLocation": false,
+  "showAddLocation": true,
   "showPlaneSwitcher": true,
   "showLocation": true,
   "noResults": {
