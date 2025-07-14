@@ -86,6 +86,46 @@
       ]
     },
     {
+      "title": "Questionnaires",
+      "mode": "working",
+      "section": [
+        {
+          "title": "Add Lcation Questionnaire",
+          "focus": {
+            "reference": "Questionnaire/truecover-add-location",
+            "identifier": {
+              "value": "addLocationQuestionnaire"
+            }
+          }
+        },
+        {
+          "title": "Add Location using GPS Questionnaire",
+          "focus": {
+            "reference": "Questionnaire/truecover-add-location-using-gps",
+            "identifier": {
+              "value": "addLocationUsingGPSQuestionnaire"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "StructureMaps",
+      "mode": "working",
+      "section": [
+        {
+          "title": "Add Location",
+          "focus": {
+            "reference": "StructureMap/truecover-add-location-sm",
+            "identifier": {
+              "value": "AddLocationSM"
+            }
+          },
+          "mode": "working"
+        }
+      ]
+    },
+    {
       "title": "GeoWidget configurations",
       "mode": "working",
       "section": [

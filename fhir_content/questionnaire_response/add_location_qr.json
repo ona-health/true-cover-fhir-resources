@@ -1,0 +1,101 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "a673260e-65ce-498f-937e-e8e48b175511",
+  "contained": [
+    {
+      "resourceType": "List",
+      "id": "0400d4d5-30e0-4cbb-9e42-c054e4d35049",
+      "status": "current",
+      "mode": "working",
+      "title": "GeneratedResourcesList",
+      "date": "2025-07-11T08:39:36+03:00",
+      "entry": [
+        {
+          "deleted": false,
+          "date": "2025-07-11T08:39:36+03:00",
+          "item": {
+            "reference": "Location/03e1125d-4ec4-4749-b525-d2afdc910043"
+          }
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://github.com/google-android/questionnaire-lastLaunched-timestamp",
+      "valueDateTime": "2025-07-11T08:39:10+03:00"
+    }
+  ],
+  "questionnaire": "Questionnaire/truecover-add-location",
+  "status": "completed",
+  "subject": {
+    "reference": "Location/03e1125d-4ec4-4749-b525-d2afdc910043"
+  },
+  "authored": "2025-07-11T08:39:35+03:00",
+  "author": {
+    "reference": "Practitioner/9d4e583d-ceed-417d-a928-95cffe15b54f"
+  },
+  "item": [
+    {
+      "linkId": "location-name",
+      "text": "Name of the household",
+      "answer": [
+        {
+          "valueString": "James Deer"
+        }
+      ]
+    },
+    {
+      "linkId": "select-province",
+      "text": "Province",
+      "answer": [
+        {
+          "valueReference": {
+            "reference": "Location/62851f8a-7a41-46b1-88ab-a9cbdb73c997",
+            "display": "Test Province"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "select-district",
+      "text": "Test Province",
+      "answer": [
+        {
+          "valueReference": {
+            "reference": "Location/d5be5731-462f-497b-890f-a2d7193bc293",
+            "display": "Test District"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "select-operational-area",
+      "text": "Test District",
+      "answer": [
+        {
+          "valueReference": {
+            "reference": "Location/2514c212-7096-4ba4-ae75-b1a1b8c75768",
+            "display": "Test OA"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "positionLongitude",
+      "answer": [
+        {
+          "valueString": "4.069375754048968"
+        }
+      ]
+    },
+    {
+      "linkId": "positionLatitude",
+      "answer": [
+        {
+          "valueString": "39.090815109935846"
+        }
+      ]
+    }
+  ]
+}

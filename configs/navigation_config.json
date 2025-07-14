@@ -8,22 +8,21 @@
   },
   "clientRegisters": [
     {
-      "id": "taskRegister",
-      "display": "{{ tasks }}",
+      "id": "addLocation",
+      "display": "{{ add.household}}",
       "menuIconConfig": {
         "type": "local",
         "reference": "ic_home"
       },
-      "showCount": true,
       "actions": [
         {
           "trigger": "ON_CLICK",
-          "workflow": "LAUNCH_REGISTER",
-          "id": "taskRegister"
-        },
-        {
-          "trigger": "ON_COUNT",
-          "id": "taskRegister"
+          "workflow": "LAUNCH_QUESTIONNAIRE",
+          "questionnaire": {
+            "id": "truecover-add-location-using-gps",
+            "title": "Add Household",
+            "saveButtonText": "Save"
+          }
         }
       ]
     }
