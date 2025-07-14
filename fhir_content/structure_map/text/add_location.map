@@ -34,6 +34,8 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
     	src.item as locName where(linkId="location-name") and answer.count()>0 then {
     	    src -> loc.name = evaluate(locName, $this.answer.value) "r_loc_name";
     	} "r_loc_name_exists";
+
+    	// Extract lat/long from dropped pin
     	src.item as locLon where(linkId="positionLongitude") and answer.count()>0 then {
     	    src.item as locLat where(linkId="positionLatitude") and answer.count()>0 then {
                 src -> loc.position = create("Location_Position") as pos then {
@@ -42,6 +44,18 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
                 } "r_loc_pos";
             } "r_loc_lat_exists";
         } "r_loc_lon_exists";
+
+        // Extract lat/long from GPS coordinates
+       src.item as locationWidgetItem where(linkId='location-widget') then {
+           src -> loc.position = create("Location_Position") as position then {
+                locationWidgetItem.item as itemLatitude where(linkId='latitude') then {
+                   src -> position.latitude = evaluate(src, itemLatitude.answer.value) "r-position-latitude";
+               } "r-latitude-item";
+               locationWidgetItem.item as itemLongitude where(linkId='longitude') then {
+                   src -> position.longitude = evaluate(src, itemLongitude.answer.value) "r-position-longitude";
+               } "r-longitude-item";
+           } "r_position_data";
+       } "r_loc_widget";
 
         src -> loc.type = create("CodeableConcept") as concept then {
             src -> concept.coding = create("Coding") as coding then {

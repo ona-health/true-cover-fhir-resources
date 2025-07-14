@@ -1,0 +1,342 @@
+{
+  "id": "truecover-add-location-using-gps",
+  "resourceType": "Questionnaire",
+  "title": "Add Location",
+  "version": "0.0.1",
+  "status": "active",
+  "publisher": "OpenSRP",
+  "subjectType": [
+    "Location"
+  ],
+  "contact": [
+    {
+      "name": "http://www.opensrp.io"
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-targetStructureMap",
+      "valueCanonical": "https://fhir.labs.smartregister.org/fhir/StructureMap/truecover-add-location-sm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression": {
+        "name": "provinces",
+        "expression": "Location?partof=Location/thailand-test-location",
+        "language": "application/x-fhir-query"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression": {
+        "name": "province-id",
+        "language": "text/fhirpath",
+        "expression": "%resource.descendants().where(linkId='select-province').answer.value.reference"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression": {
+        "name": "selected-province-name",
+        "language": "text/fhirpath",
+        "expression": "iif(%province-id.exists(), %resource.descendants().where(linkId='select-province').answer.value.display, 'District')"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression": {
+        "name": "district-id",
+        "language": "text/fhirpath",
+        "expression": "%resource.descendants().where(linkId='select-district').answer.value.reference"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression": {
+        "name": "selected-district-name",
+        "language": "text/fhirpath",
+        "expression": "iif(%district-id.exists(), %resource.descendants().where(linkId='select-district').answer.value.display, 'Operational Area')"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/variable",
+      "valueExpression": {
+        "name": "operational-area-id",
+        "language": "text/fhirpath",
+        "expression": "%resource.descendants().where(linkId='select-operational-area').answer.value.reference"
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "location-name",
+      "type": "string",
+      "text": "Name of the household",
+      "required": true
+    },
+    {
+      "linkId": "location-widget",
+      "type": "group",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/translation",
+            "extension": [
+              {
+                "url": "lang",
+                "valueCode": "fr"
+              },
+              {
+                "url": "content",
+                "valueString": "Enregistrer les coordonnées GPS"
+              }
+            ]
+          }
+        ]
+      },
+      "text": "Record GPS Location",
+      "extension": [
+        {
+          "url": "https://github.com/google/android-fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "https://github.com/google/android-fhir/questionnaire-item-control",
+                "code": "location-widget"
+              }
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "latitude",
+          "type": "decimal",
+          "required": true,
+          "_text": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                "extension": [
+                  {
+                    "url": "lang",
+                    "valueCode": "fr"
+                  },
+                  {
+                    "url": "content",
+                    "valueString": "Latitude"
+                  }
+                ]
+              }
+            ]
+          },
+          "text": "Latitude",
+          "extension": [
+            {
+              "url": "gps-coordinate",
+              "valueString": "latitude"
+            }
+          ]
+        },
+        {
+          "linkId": "longitude",
+          "type": "decimal",
+          "required": true,
+          "_text": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/translation",
+                "extension": [
+                  {
+                    "url": "lang",
+                    "valueCode": "fr"
+                  },
+                  {
+                    "url": "content",
+                    "valueString": "Longitude"
+                  }
+                ]
+              }
+            ]
+          },
+          "text": "Longitude",
+          "extension": [
+            {
+              "url": "gps-coordinate",
+              "valueString": "longitude"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "select-province",
+      "text": "Province",
+      "type": "reference",
+      "required": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "drop-down",
+                "display": "Drop down"
+              }
+            ],
+            "text": "Drop down"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression",
+          "valueExpression": {
+            "expression": "Location?partof=Location/thailand-test-location",
+            "language": "application/x-fhir-query"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
+          "extension": [
+            {
+              "url": "path",
+              "valueString": "name"
+            },
+            {
+              "url": "forDisplay",
+              "valueBoolean": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "drop-down",
+                "display": "Drop down"
+              }
+            ],
+            "text": "Drop down"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression",
+          "valueExpression": {
+            "expression": "Location?partof={{%province-id}}",
+            "language": "application/x-fhir-query"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
+          "extension": [
+            {
+              "url": "path",
+              "valueString": "name"
+            },
+            {
+              "url": "forDisplay",
+              "valueBoolean": true
+            }
+          ]
+        }
+      ],
+      "linkId": "select-district",
+      "text": "District",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+            "valueExpression": {
+              "language": "text/fhirpath",
+              "expression": "%selected-province-name"
+            }
+          }
+        ]
+      },
+      "type": "reference",
+      "required": true
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "drop-down",
+                "display": "Drop down"
+              }
+            ],
+            "text": "Drop down"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-answerExpression",
+          "valueExpression": {
+            "expression": "Location?partof={{%district-id}}",
+            "language": "application/x-fhir-query"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-choiceColumn",
+          "extension": [
+            {
+              "url": "path",
+              "valueString": "name"
+            },
+            {
+              "url": "forDisplay",
+              "valueBoolean": true
+            }
+          ]
+        }
+      ],
+      "linkId": "select-operational-area",
+      "text": "Operational Area",
+      "_text": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+            "valueExpression": {
+              "language": "text/fhirpath",
+              "expression": "%selected-district-name"
+            }
+          }
+        ]
+      },
+      "type": "reference",
+      "required": true
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ],
+      "linkId": "positionLongitude",
+      "type": "string",
+      "readOnly": true,
+      "required": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ],
+      "linkId": "positionLatitude",
+      "type": "string",
+      "readOnly": true,
+      "required": false
+    }
+  ]
+}

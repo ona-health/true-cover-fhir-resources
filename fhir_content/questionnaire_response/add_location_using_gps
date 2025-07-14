@@ -1,0 +1,115 @@
+{
+  "resourceType": "QuestionnaireResponse",
+  "id": "cee19d58-69c1-4ac0-93aa-1b0a4898ec00",
+  "contained": [
+    {
+      "resourceType": "List",
+      "id": "75706e4b-5d36-4dee-bcb6-7611391615a3",
+      "status": "current",
+      "mode": "working",
+      "title": "GeneratedResourcesList",
+      "date": "2025-07-14T10:12:39+03:00",
+      "entry": [
+        {
+          "deleted": false,
+          "date": "2025-07-14T10:12:39+03:00",
+          "item": {
+            "reference": "Location/8bbf20e2-1db7-44a5-8023-9cf95c485036"
+          }
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://github.com/google-android/questionnaire-lastLaunched-timestamp",
+      "valueDateTime": "2025-07-14T10:12:12+03:00"
+    }
+  ],
+  "questionnaire": "Questionnaire/truecover-add-location-using-gps",
+  "status": "completed",
+  "subject": {
+    "reference": "Location/8bbf20e2-1db7-44a5-8023-9cf95c485036"
+  },
+  "authored": "2025-07-14T10:12:39+03:00",
+  "author": {
+    "reference": "Practitioner/9d4e583d-ceed-417d-a928-95cffe15b54f"
+  },
+  "item": [
+    {
+      "linkId": "location-name",
+      "text": "Name of the household",
+      "answer": [
+        {
+          "valueString": "GPS home"
+        }
+      ]
+    },
+    {
+      "linkId": "location-widget",
+      "text": "Record GPS Location",
+      "item": [
+        {
+          "linkId": "latitude",
+          "text": "Latitude",
+          "answer": [
+            {
+              "valueDecimal": 56.11111
+            }
+          ]
+        },
+        {
+          "linkId": "longitude",
+          "text": "Longitude",
+          "answer": [
+            {
+              "valueDecimal": 23.232323
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "select-province",
+      "text": "Province",
+      "answer": [
+        {
+          "valueReference": {
+            "reference": "Location/62851f8a-7a41-46b1-88ab-a9cbdb73c997",
+            "display": "Test Province"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "select-district",
+      "text": "Test Province",
+      "answer": [
+        {
+          "valueReference": {
+            "reference": "Location/d5be5731-462f-497b-890f-a2d7193bc293",
+            "display": "Test District"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "select-operational-area",
+      "text": "Test District",
+      "answer": [
+        {
+          "valueReference": {
+            "reference": "Location/2514c212-7096-4ba4-ae75-b1a1b8c75768",
+            "display": "Test OA"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "positionLongitude"
+    },
+    {
+      "linkId": "positionLatitude"
+    }
+  ]
+}
