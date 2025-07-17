@@ -223,11 +223,12 @@
       "extension": [
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
-          "valueBoolean": true
+          "valueBoolean": false
         }
       ],
       "linkId": "positionLongitude",
       "type": "string",
+      "text": "Longitude",
       "readOnly": true,
       "required": false
     },
@@ -235,10 +236,11 @@
       "extension": [
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
-          "valueBoolean": true
+          "valueBoolean": false
         }
       ],
       "linkId": "positionLatitude",
+      "text": "Latitude",
       "type": "string",
       "readOnly": true,
       "required": false
