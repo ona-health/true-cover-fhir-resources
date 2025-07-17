@@ -265,6 +265,99 @@
       }
     ]
   },
+  "actions": [
+    {
+      "trigger": "ON_CLICK",
+      "workflow": "SUMMARY_BOTTOM_SHEET",
+      "id": "summaryBottomSheet",
+      "display": "{{ household.details }}",
+      "params": [
+        {
+          "paramType": "PARAMDATA",
+          "key": "householdId",
+          "value": "@{householdId}"
+        }
+      ]
+    }
+  ],
+  "summaryBottomSheetConfig": {
+    "views": [
+      {
+        "viewType": "CARD",
+        "visible": "true",
+        "contentPadding": 0,
+        "content": [
+          {
+            "viewType": "CARD",
+            "contentPadding": 16,
+            "visible": "true",
+            "content": [
+              {
+                "viewType": "ROW",
+                "alignment": "START",
+                "fillMaxWidth": true,
+                "clickable": false,
+                "children": [
+                  {
+                    "viewType": "IMAGE",
+                    "tint": "#9e9b9b",
+                    "size": 60,
+                    "imageConfig": {
+                      "type": "local",
+                      "reference": "@{typeImage}"
+                    },
+                    "isCircular": true
+                  },
+                  {
+                    "viewType": "COLUMN",
+                    "children": [
+                      {
+                        "viewType": "COMPOUND_TEXT",
+                        "primaryText": "@{name}",
+                        "primaryTextFontWeight": "BOLD",
+                        "fontSize": 17.0,
+                        "primaryTextColor": "#000000"
+                      },
+                      {
+                        "viewType": "SPACER",
+                        "height": 8
+                      },
+                      {
+                        "viewType": "BUTTON",
+                        "smallSized": true,
+                        "text": "Household Survey",
+                        "status": "DUE",
+                        "alignment": "CENTER",
+                        "startIcon": {
+                          "type": "local",
+                          "reference": "@{ic_home}"
+                        },
+                        "clickable": true,
+                        "fillMaxWidth": false,
+                        "actions": [
+                          {
+                            "trigger": "ON_CLICK",
+                            "workflow": "LAUNCH_QUESTIONNAIRE",
+                            "questionnaire": {
+                              "id": "truecover-household-survey",
+                              "title": "Household Survey",
+                              "saveButtonText": "Save",
+                              "resourceType": "Location",
+                              "resourceIdentifier": "@{householdId}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "filterDataByRelatedEntityLocation": true,
   "filterDataByLocationLineage": true
 }

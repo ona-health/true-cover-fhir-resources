@@ -106,6 +106,15 @@
               "value": "addLocationUsingGPSQuestionnaire"
             }
           }
+        },
+        {
+          "title": "Household Questionnaire",
+          "focus": {
+            "reference": "Questionnaire/truecover-household-survey",
+            "identifier": {
+              "value": "householdSurveyQuestionnaire"
+            }
+          }
         }
       ]
     },
