@@ -3,7 +3,7 @@
   "id": "truecover-add-location-sm",
   "text": {
     "status": "additional",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://hl7.org/fhir/StructureMap/truecover-add-location-sm&quot; = 'True Cover Add Location'\nuses &quot;http://hl7.org/fhir/StructureDefinition/QuestionnaireReponse&quot; as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; as target\n\ngroup AddLocation(source src : QuestionnaireResponse, target bundle: Bundle) {\n    src -&gt; bundle.type = &quot;collection&quot; &quot;r_bundle_type&quot;;\n    src then ExtractLocation(src, bundle)&quot;r_bundle_entries&quot;;\n}\n\ngroup ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;Location&quot;) as loc then {\n    \tsrc -&gt; loc.id = uuid() &quot;r_loc_id&quot;;\n    \tsrc -&gt; loc.status =  &quot;active&quot; &quot;r_loc_status&quot;;\n    \tsrc -&gt; loc.meta = create(&quot;Meta&quot;) as meta then {\n    \t    src.item as province where(linkId=&quot;select-province&quot;) and answer.count()&gt;0 then {\n                src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = evaluate(province, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_1_meta_code&quot;;\n                    src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_1_meta_system&quot;;\n                } &quot;r_loc_level_1_meta_tag&quot;;\n            } &quot;r_loc_level_1_meta_exists&quot;;\n            src.item as district where(linkId=&quot;select-district&quot;) and answer.count()&gt;0 then {\n                src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = evaluate(district, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_2_meta_code&quot;;\n                    src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_2_meta_system&quot;;\n                } &quot;r_loc_level_2_meta_tag&quot;;\n            } &quot;r_loc_level_2_meta_exists&quot;;\n            src.item as operationalArea where(linkId=&quot;select-operational-area&quot;) and answer.count()&gt;0 then {\n                src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = evaluate(operationalArea, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_3_meta_code&quot;;\n                    src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_3_meta_system&quot;;\n                } &quot;r_loc_level_3_meta_tag&quot;;\n            } &quot;r_loc_level_3_meta_exists&quot;;\n    \t} &quot;r_loc_meta&quot;;\n    \tsrc.item as locName where(linkId=&quot;location-name&quot;) and answer.count()&gt;0 then {\n    \t    src -&gt; loc.name = evaluate(locName, $this.answer.value) &quot;r_loc_name&quot;;\n    \t} &quot;r_loc_name_exists&quot;;\n\n    \t// Extract lat/long from dropped pin\n    \tsrc.item as locLon where(linkId=&quot;positionLongitude&quot;) and answer.count()&gt;0 then {\n    \t    src.item as locLat where(linkId=&quot;positionLatitude&quot;) and answer.count()&gt;0 then {\n                src -&gt; loc.position = create(&quot;Location_Position&quot;) as pos then {\n                    src -&gt; pos.longitude = evaluate(locLon, $this.answer.value)&quot;r_loc_long&quot;;\n                    src -&gt; pos.latitude = evaluate(locLat, $this.answer.value) &quot;r_loc_lat&quot;;\n                } &quot;r_loc_pos&quot;;\n            } &quot;r_loc_lat_exists&quot;;\n        } &quot;r_loc_lon_exists&quot;;\n\n        // Extract lat/long from GPS coordinates\n       src.item as locationWidgetItem where(linkId='location-widget') then {\n           src -&gt; loc.position = create(&quot;Location_Position&quot;) as position then {\n                locationWidgetItem.item as itemLatitude where(linkId='latitude') then {\n                   src -&gt; position.latitude = evaluate(src, itemLatitude.answer.value) &quot;r-position-latitude&quot;;\n               } &quot;r-latitude-item&quot;;\n               locationWidgetItem.item as itemLongitude where(linkId='longitude') then {\n                   src -&gt; position.longitude = evaluate(src, itemLongitude.answer.value) &quot;r-position-longitude&quot;;\n               } &quot;r-longitude-item&quot;;\n           } &quot;r_position_data&quot;;\n       } &quot;r_loc_widget&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_building_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_building_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_building_loc_type_system&quot;;\n                } &quot;r_building_loc_type_coding&quot;;\n        } &quot;r_building_loc_type&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;5&quot; &quot;r_admin_level_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Level 5&quot; &quot;r_admin_level_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;https://smartregister.org/codes/administrative-level&quot; &quot;r_admin_level_loc_type_system&quot;;\n            } &quot;r_admin_level_loc_type_coding&quot;;\n        } &quot;r_admin_level_loc_type_concept&quot;;\n\n        src -&gt; loc.physicalType = create(&quot;CodeableConcept&quot;) as concept then {\n             src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_loc_type_system&quot;;\n            } &quot;r_loc_type_coding&quot;;\n        } &quot;r_loc_type_concept&quot;;\n\n        src.item as parentLoc where(linkId=&quot;select-operational-area&quot;) and answer.count()&gt;0 then {\n            src -&gt; loc.partOf = create(&quot;Reference&quot;) as ref then {\n                src -&gt; ref.reference = evaluate(parentLoc, $this.answer.value.reference) &quot;r_loc_part_of&quot;;\n                src -&gt; ref.display = evaluate(parentLoc, $this.answer.value.display)  &quot;r_loc_part_of_display&quot;;\n            } &quot;r_loc_part_of_ref&quot;;\n        } &quot;r_parent_location&quot;;\n    } &quot;r_loc&quot;;\n}</pre></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://hl7.org/fhir/StructureMap/truecover-add-location-sm&quot; = 'True Cover Add Location'\nuses &quot;http://hl7.org/fhir/StructureDefinition/QuestionnaireReponse&quot; as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; as target\n\ngroup AddLocation(source src : QuestionnaireResponse, target bundle: Bundle) {\n    src -&gt; bundle.type = &quot;collection&quot; &quot;r_bundle_type&quot;;\n    src then ExtractLocation(src, bundle)&quot;r_bundle_entries&quot;;\n}\n\ngroup ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;Location&quot;) as loc then {\n    \tsrc -&gt; loc.id = uuid() &quot;r_loc_id&quot;;\n    \tsrc -&gt; loc.status =  &quot;active&quot; &quot;r_loc_status&quot;;\n    \tsrc -&gt; loc.meta = create(&quot;Meta&quot;) as meta then {\n    \t    src.item as province where(linkId=&quot;select-province&quot;) and answer.count()&gt;0 then {\n                src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = evaluate(province, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_1_meta_code&quot;;\n                    src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_1_meta_system&quot;;\n                } &quot;r_loc_level_1_meta_tag&quot;;\n            } &quot;r_loc_level_1_meta_exists&quot;;\n            src.item as district where(linkId=&quot;select-district&quot;) and answer.count()&gt;0 then {\n                src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = evaluate(district, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_2_meta_code&quot;;\n                    src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_2_meta_system&quot;;\n                } &quot;r_loc_level_2_meta_tag&quot;;\n            } &quot;r_loc_level_2_meta_exists&quot;;\n            src.item as operationalArea where(linkId=&quot;select-operational-area&quot;) and answer.count()&gt;0 then {\n                src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = evaluate(operationalArea, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_3_meta_code&quot;;\n                    src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_3_meta_system&quot;;\n                } &quot;r_loc_level_3_meta_tag&quot;;\n            } &quot;r_loc_level_3_meta_exists&quot;;\n    \t} &quot;r_loc_meta&quot;;\n    \tsrc.item as locName where(linkId=&quot;location-name&quot;) and answer.count()&gt;0 then {\n    \t    src -&gt; loc.name = evaluate(locName, $this.answer.value) &quot;r_loc_name&quot;;\n    \t} &quot;r_loc_name_exists&quot;;\n\n    \t// Extract lat/long from dropped pin\n    \tsrc.item as locLon where(linkId=&quot;positionLongitude&quot;) and answer.count()&gt;0 then {\n    \t    src.item as locLat where(linkId=&quot;positionLatitude&quot;) and answer.count()&gt;0 then {\n                src -&gt; loc.position = create(&quot;Location_Position&quot;) as pos then {\n                    src -&gt; pos.longitude = evaluate(locLon, $this.answer.value)&quot;r_loc_long&quot;;\n                    src -&gt; pos.latitude = evaluate(locLat, $this.answer.value) &quot;r_loc_lat&quot;;\n                } &quot;r_loc_pos&quot;;\n            } &quot;r_loc_lat_exists&quot;;\n        } &quot;r_loc_lon_exists&quot;;\n\n        // Extract lat/long from GPS coordinates\n       src.item as locationWidgetItem where(linkId='location-widget') then {\n           src -&gt; loc.position = create(&quot;Location_Position&quot;) as position then {\n                locationWidgetItem.item as itemLatitude where(linkId='latitude') then {\n                   src -&gt; position.latitude = evaluate(src, itemLatitude.answer.value) &quot;r-position-latitude&quot;;\n               } &quot;r-latitude-item&quot;;\n               locationWidgetItem.item as itemLongitude where(linkId='longitude') then {\n                   src -&gt; position.longitude = evaluate(src, itemLongitude.answer.value) &quot;r-position-longitude&quot;;\n               } &quot;r-longitude-item&quot;;\n           } &quot;r_position_data&quot;;\n       } &quot;r_loc_widget&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_building_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_building_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_building_loc_type_system&quot;;\n                } &quot;r_building_loc_type_coding&quot;;\n        } &quot;r_building_loc_type&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;5&quot; &quot;r_admin_level_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Level 5&quot; &quot;r_admin_level_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;https://smartregister.org/codes/administrative-level&quot; &quot;r_admin_level_loc_type_system&quot;;\n            } &quot;r_admin_level_loc_type_coding&quot;;\n        } &quot;r_admin_level_loc_type_concept&quot;;\n\n        src -&gt; loc.physicalType = create(&quot;CodeableConcept&quot;) as concept then {\n             src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_loc_type_system&quot;;\n            } &quot;r_loc_type_coding&quot;;\n        } &quot;r_loc_type_concept&quot;;\n\n        src.item as parentLoc where(linkId=&quot;select-operational-area&quot;) and answer.count()&gt;0 then {\n            src -&gt; loc.partOf = create(&quot;Reference&quot;) as ref then {\n                src -&gt; ref.reference = evaluate(parentLoc, $this.answer.value.reference) &quot;r_loc_part_of&quot;;\n                src -&gt; ref.display = evaluate(parentLoc, $this.answer.value.display)  &quot;r_loc_part_of_display&quot;;\n            } &quot;r_loc_part_of_ref&quot;;\n        } &quot;r_parent_location&quot;;\n\n        src then ExtractGroup(src, loc ,bundle) &quot;r_extract_group&quot;;\n    } &quot;r_loc&quot;;\n}\n\ngroup ExtractGroup(source src : QuestionnaireResponse, source location : Location, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;Group&quot;) as group then {\n       src -&gt; group.id = uuid() &quot;rule_group_id_value&quot;;\n       src -&gt; group.name = evaluate(src, $this.item.where(linkId = 'house-hold-head-name').answer.value) &quot;rule_group_name&quot;;\n\n       src -&gt; group.identifier = create('Identifier') as groupIdentifier then {\n          src -&gt; groupIdentifier.value = uuid() &quot;rule_group_identifier_value&quot;;\n          src -&gt; groupIdentifier.use = &quot;secondary&quot; &quot;rule_group_identifier_use&quot;;\n          src -&gt; groupIdentifier.period = create('Period') as period, period.start = evaluate(src, $this.authored) &quot;rule_group_identifier_period&quot;;\n       } &quot;rule_group_identifier&quot;;\n\n       src -&gt; group.active = true &quot;r_grp_status_data&quot;;\n\n       src -&gt; group.characteristic = create('Group_Characteristic') as includeFamily then {\n           src -&gt; includeFamily.exclude = false &quot;rule_exclude_group_false&quot;;\n       } &quot;rule_group_char&quot;;\n\n       src -&gt; group.characteristic = create('Group_Characteristic') as familyCharacteristic then {\n           src -&gt; familyCharacteristic.code = create('CodeableConcept') as familyCharacteristicCode then{\n               src -&gt; familyCharacteristicCode.coding = c(&quot;https://smartregister.org/&quot;, &quot;active&quot;) as coding then {\n               src -&gt; coding.display = 'Active' &quot;r_cp_cod_disp_v&quot;;\n               } &quot;r_grp_vcode&quot;;\n           } &quot;rule_group_char_code&quot;;\n       } &quot;rule_group_char&quot;;\n\n       src -&gt; group.type = 'person' &quot;r_grp_type_data&quot;;\n       src -&gt; group.actual = true &quot;r_grp_actual_data&quot;;\n       src -&gt; group.code = create('CodeableConcept') as concept then ExtractFamilyCode(src, concept) &quot;r_grp_code_data&quot;;\n\n        // Add location characteristic\n       src -&gt; group.characteristic = create ('Group_Characteristic') as groupCharacteristic then {\n            src -&gt; groupCharacteristic.code = create('CodeableConcept') as locationCode then{\n                src -&gt; locationCode.coding = c(&quot;https://smartregister.org/&quot;, &quot;hh_location&quot;) as coding then {\n                    src -&gt; coding.display = 'Household location' &quot;r_cp_cod_disp_v&quot;;\n                } &quot;r_grp_vcode&quot;;\n            } &quot;r_cp_cc_coding_v&quot;;\n            src -&gt; groupCharacteristic.value = create('CodeableConcept') as locationValue then{\n                src -&gt; locationValue.coding = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.system = &quot;https://smartregister.org/&quot; &quot;r_cp_cod_system_v&quot;;\n                    src -&gt; coding.code = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) &quot;r_cp_cod_value_v&quot;;\n                    src -&gt; coding.display = 'Household location' &quot;r_cp_cod_disp_v&quot;;\n                } &quot;r_grp_vcode&quot;;\n            } &quot;r_group_value_coding_v&quot;;\n            //src -&gt; groupCharacteristic.value = create('Reference') as ref, ref.reference = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) &quot;r_group_char_v&quot;;\n            src -&gt; groupCharacteristic.exclude = false &quot;r_group_char_exclude_v&quot;;\n       } &quot;r_group_char_v&quot;;\n    } &quot;r_group_bundle_entry&quot;;\n}\n\ngroup ExtractFamilyCode(source src : Group, target concept: CodeableConcept) {\n    src -&gt; concept.coding = c(&quot;https://www.snomed.org&quot;, &quot;35359004&quot;) as coding then {\n        src -&gt; coding.display = 'Family' &quot;r_cp_cod_disp&quot;;\n\n    } &quot;r_cp_cc_cod&quot;;\n}</pre></div>"
   },
   "url": "http://hl7.org/fhir/StructureMap/truecover-add-location-sm",
   "name": "True Cover Add Location",
@@ -1084,6 +1084,746 @@
                           ]
                         }
                       ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "r_extract_group",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "dependent": [
+                {
+                  "name": "ExtractGroup",
+                  "variable": [
+                    "src",
+                    "loc",
+                    "bundle"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ExtractGroup",
+      "typeMode": "none",
+      "input": [
+        {
+          "name": "src",
+          "type": "QuestionnaireResponse",
+          "mode": "source"
+        },
+        {
+          "name": "location",
+          "type": "Location",
+          "mode": "source"
+        },
+        {
+          "name": "bundle",
+          "type": "Bundle",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "r_group_bundle_entry",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "contextType": "variable",
+              "element": "entry",
+              "variable": "entry"
+            },
+            {
+              "context": "entry",
+              "contextType": "variable",
+              "element": "resource",
+              "variable": "group",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Group"
+                }
+              ]
+            }
+          ],
+          "rule": [
+            {
+              "name": "rule_group_id_value",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "id",
+                  "transform": "uuid"
+                }
+              ]
+            },
+            {
+              "name": "rule_group_name",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "name",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueString": "$this.item.where(linkId = 'house-hold-head-name').answer.value"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rule_group_identifier",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "identifier",
+                  "variable": "groupIdentifier",
+                  "transform": "create",
+                  "parameter": [
+                    {
+                      "valueString": "Identifier"
+                    }
+                  ]
+                }
+              ],
+              "rule": [
+                {
+                  "name": "rule_group_identifier_value",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "groupIdentifier",
+                      "contextType": "variable",
+                      "element": "value",
+                      "transform": "uuid"
+                    }
+                  ]
+                },
+                {
+                  "name": "rule_group_identifier_use",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "groupIdentifier",
+                      "contextType": "variable",
+                      "element": "use",
+                      "transform": "copy",
+                      "parameter": [
+                        {
+                          "valueString": "secondary"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "rule_group_identifier_period",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "groupIdentifier",
+                      "contextType": "variable",
+                      "element": "period",
+                      "variable": "period",
+                      "transform": "create",
+                      "parameter": [
+                        {
+                          "valueString": "Period"
+                        }
+                      ]
+                    },
+                    {
+                      "context": "period",
+                      "contextType": "variable",
+                      "element": "start",
+                      "transform": "evaluate",
+                      "parameter": [
+                        {
+                          "valueId": "src"
+                        },
+                        {
+                          "valueString": "$this.authored"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "r_grp_status_data",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "active",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueBoolean": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rule_group_char",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "characteristic",
+                  "variable": "includeFamily",
+                  "transform": "create",
+                  "parameter": [
+                    {
+                      "valueString": "Group_Characteristic"
+                    }
+                  ]
+                }
+              ],
+              "rule": [
+                {
+                  "name": "rule_exclude_group_false",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "includeFamily",
+                      "contextType": "variable",
+                      "element": "exclude",
+                      "transform": "copy",
+                      "parameter": [
+                        {
+                          "valueBoolean": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rule_group_char",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "characteristic",
+                  "variable": "familyCharacteristic",
+                  "transform": "create",
+                  "parameter": [
+                    {
+                      "valueString": "Group_Characteristic"
+                    }
+                  ]
+                }
+              ],
+              "rule": [
+                {
+                  "name": "rule_group_char_code",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "familyCharacteristic",
+                      "contextType": "variable",
+                      "element": "code",
+                      "variable": "familyCharacteristicCode",
+                      "transform": "create",
+                      "parameter": [
+                        {
+                          "valueString": "CodeableConcept"
+                        }
+                      ]
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_grp_vcode",
+                      "source": [
+                        {
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "familyCharacteristicCode",
+                          "contextType": "variable",
+                          "element": "coding",
+                          "variable": "coding",
+                          "transform": "c",
+                          "parameter": [
+                            {
+                              "valueString": "https://smartregister.org/"
+                            },
+                            {
+                              "valueString": "active"
+                            }
+                          ]
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_cp_cod_disp_v",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "display",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "Active"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "r_grp_type_data",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "type",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "person"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "r_grp_actual_data",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "actual",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueBoolean": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "r_grp_code_data",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "code",
+                  "variable": "concept",
+                  "transform": "create",
+                  "parameter": [
+                    {
+                      "valueString": "CodeableConcept"
+                    }
+                  ]
+                }
+              ],
+              "dependent": [
+                {
+                  "name": "ExtractFamilyCode",
+                  "variable": [
+                    "src",
+                    "concept"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "r_group_char_v",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "group",
+                  "contextType": "variable",
+                  "element": "characteristic",
+                  "variable": "groupCharacteristic",
+                  "transform": "create",
+                  "parameter": [
+                    {
+                      "valueString": "Group_Characteristic"
+                    }
+                  ]
+                }
+              ],
+              "rule": [
+                {
+                  "name": "r_cp_cc_coding_v",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "groupCharacteristic",
+                      "contextType": "variable",
+                      "element": "code",
+                      "variable": "locationCode",
+                      "transform": "create",
+                      "parameter": [
+                        {
+                          "valueString": "CodeableConcept"
+                        }
+                      ]
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_grp_vcode",
+                      "source": [
+                        {
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "locationCode",
+                          "contextType": "variable",
+                          "element": "coding",
+                          "variable": "coding",
+                          "transform": "c",
+                          "parameter": [
+                            {
+                              "valueString": "https://smartregister.org/"
+                            },
+                            {
+                              "valueString": "hh_location"
+                            }
+                          ]
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_cp_cod_disp_v",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "display",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "Household location"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "r_group_value_coding_v",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "groupCharacteristic",
+                      "contextType": "variable",
+                      "element": "value",
+                      "variable": "locationValue",
+                      "transform": "create",
+                      "parameter": [
+                        {
+                          "valueString": "CodeableConcept"
+                        }
+                      ]
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_grp_vcode",
+                      "source": [
+                        {
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "locationValue",
+                          "contextType": "variable",
+                          "element": "coding",
+                          "variable": "coding",
+                          "transform": "create",
+                          "parameter": [
+                            {
+                              "valueString": "Coding"
+                            }
+                          ]
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_cp_cod_system_v",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "system",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "https://smartregister.org/"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "r_cp_cod_value_v",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "code",
+                              "transform": "evaluate",
+                              "parameter": [
+                                {
+                                  "valueId": "location"
+                                },
+                                {
+                                  "valueString": "$this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "r_cp_cod_disp_v",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "display",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "Household location"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "r_group_char_exclude_v",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "groupCharacteristic",
+                      "contextType": "variable",
+                      "element": "exclude",
+                      "transform": "copy",
+                      "parameter": [
+                        {
+                          "valueBoolean": false
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ExtractFamilyCode",
+      "typeMode": "none",
+      "input": [
+        {
+          "name": "src",
+          "type": "Group",
+          "mode": "source"
+        },
+        {
+          "name": "concept",
+          "type": "CodeableConcept",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "r_cp_cc_cod",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "concept",
+              "contextType": "variable",
+              "element": "coding",
+              "variable": "coding",
+              "transform": "c",
+              "parameter": [
+                {
+                  "valueString": "https://www.snomed.org"
+                },
+                {
+                  "valueString": "35359004"
+                }
+              ]
+            }
+          ],
+          "rule": [
+            {
+              "name": "r_cp_cod_disp",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "coding",
+                  "contextType": "variable",
+                  "element": "display",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "Family"
                     }
                   ]
                 }
