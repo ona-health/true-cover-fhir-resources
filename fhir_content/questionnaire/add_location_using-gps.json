@@ -69,10 +69,28 @@
   ],
   "item": [
     {
-      "linkId": "location-name",
-      "type": "string",
-      "text": "Name of the household",
+      "linkId": "survey-date",
+      "type": "date",
+      "text": "Date of survey",
       "required": true
+    },
+    {
+      "linkId": "house-hold-head-name",
+      "type": "string",
+      "text": "Head of household name?",
+      "required": true
+    },
+    {
+      "linkId": "phone-number",
+      "type": "string",
+      "text": "What is the household phone number?",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/regex",
+          "valueString": "^((\\+|00)(\\d{1,3}))?\\d{5,12}$"
+        }
+      ],
+      "required": false
     },
     {
       "linkId": "location-widget",

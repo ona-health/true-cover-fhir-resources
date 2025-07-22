@@ -325,9 +325,9 @@
                       {
                         "viewType": "BUTTON",
                         "smallSized": true,
-                        "text": "Household Survey",
+                        "text": "Household Profile",
                         "status": "DUE",
-                        "alignment": "CENTER",
+                        "alignment": "END",
                         "startIcon": {
                           "type": "local",
                           "reference": "@{ic_home}"
@@ -337,14 +337,8 @@
                         "actions": [
                           {
                             "trigger": "ON_CLICK",
-                            "workflow": "LAUNCH_QUESTIONNAIRE",
-                            "questionnaire": {
-                              "id": "truecover-household-survey",
-                              "title": "Household Survey",
-                              "saveButtonText": "Save",
-                              "resourceType": "Location",
-                              "resourceIdentifier": "@{householdId}"
-                            }
+                            "workflow": "LAUNCH_PROFILE",
+                            "id": "householdProfile"
                           }
                         ]
                       }

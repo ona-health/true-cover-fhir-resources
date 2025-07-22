@@ -37,38 +37,56 @@
   },
   "item": [
     {
-      "linkId": "location-name",
-      "text": "Name of the household",
+      "linkId": "survey-date",
+      "text": "Date of survey",
       "answer": [
         {
-          "valueString": "GPS home"
+          "valueDate": "2025-07-22"
         }
       ]
     },
     {
-      "linkId": "location-widget",
-      "text": "Record GPS Location",
-      "item": [
+      "linkId": "house-hold-head-name",
+      "text": "Head of household name?",
+      "answer": [
         {
-          "linkId": "latitude",
-          "text": "Latitude",
-          "answer": [
-            {
-              "valueDecimal": 56.11111
-            }
-          ]
-        },
-        {
-          "linkId": "longitude",
-          "text": "Longitude",
-          "answer": [
-            {
-              "valueDecimal": 23.232323
-            }
-          ]
+          "valueString": "Pedro"
         }
       ]
     },
+    {
+      "linkId": "phone-number",
+      "text": "What is the household phone number?",
+      "answer": [
+        {
+          "valueString": "12121212"
+        }
+      ]
+    },
+    {
+          "linkId": "location-widget",
+          "text": "Record GPS Location",
+          "item": [
+            {
+              "linkId": "latitude",
+              "text": "Latitude",
+              "answer": [
+                {
+                  "valueDecimal": 56.11111
+                }
+              ]
+            },
+            {
+              "linkId": "longitude",
+              "text": "Longitude",
+              "answer": [
+                {
+                  "valueDecimal": 23.232323
+                }
+              ]
+            }
+          ]
+        }
     {
       "linkId": "select-province",
       "text": "Province",

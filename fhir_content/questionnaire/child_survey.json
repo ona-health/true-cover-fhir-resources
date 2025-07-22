@@ -1,0 +1,272 @@
+{
+  "id": "truecover-child-survey",
+  "resourceType": "Questionnaire",
+  "title": "Child Survey",
+  "version": "0.0.1",
+  "status": "active",
+  "publisher": "OpenSRP",
+  "subjectType": [
+    "Patient"
+  ],
+  "contact": [
+    {
+      "name": "http://www.opensrp.io"
+    }
+  ],
+  "extension": [],
+  "item": [
+    {
+      "linkId": "survey-date",
+      "type": "date",
+      "text": "Date of survey",
+      "required": true
+    },
+    {
+      "linkId": "first-name",
+      "type": "string",
+      "text": "First Name",
+      "required": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/regex",
+          "valueString": "^[a-zA-Z\\- ]*$"
+        }
+      ]
+    },
+    {
+      "linkId": "middle-name",
+      "type": "string",
+      "text": "Middle Name",
+      "required": false,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/regex",
+          "valueString": "^[a-zA-Z\\- ]*$"
+        }
+      ]
+    },
+    {
+      "linkId": "last-name",
+      "type": "string",
+      "text": "Last Name",
+      "required": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/regex",
+          "valueString": "^[a-zA-Z\\- ]*$"
+        }
+      ]
+    },
+    {
+      "linkId": "child-gender",
+      "type": "choice",
+      "text": "Gender",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "71c8e82b-2721-47ed-eb55-cfc74ad786ba",
+            "code": "male",
+            "system": "urn:uuid:4f440ef4-0cda-4a71-888f-9e2f348a1c5e",
+            "display": "Male"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "79d705d4-4db4-46eb-85ee-4c18d1259afa",
+            "code": "female",
+            "system": "urn:uuid:4f440ef4-0cda-4a71-888f-9e2f348a1c5e",
+            "display": "Female"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "child-dob",
+      "type": "date",
+      "text": "Date of Birth",
+      "required": false
+    },
+    {
+      "linkId": "was-bcg-given",
+      "type": "choice",
+      "text": "Was BCG given",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "97d200a0-f7f2-48c1-a0ac-67433c7cf002",
+            "code": "yes",
+            "system": "urn:uuid:6c6a9cce-1351-4a9e-d215-c483def08923",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "b279a560-4f10-41d5-8be1-e54824a83d4e",
+            "code": "no",
+            "system": "urn:uuid:6c6a9cce-1351-4a9e-d215-c483def08923",
+            "display": "No"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "bcg-date",
+      "type": "date",
+      "text": "Date BCG was given",
+      "required": false,
+      "enableWhen": [
+        {
+          "question": "was-bcg-given",
+          "operator": "=",
+          "answerCoding": {
+            "system": "urn:uuid:6c6a9cce-1351-4a9e-d215-c483def08923",
+            "code": "yes"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "was-dpt3-given",
+      "type": "choice",
+      "text": "Was DPT3 given?",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "c1777680-9958-424a-9d23-2dfaeec5bb09",
+            "code": "yes",
+            "system": "urn:uuid:ed8e60f2-8a4c-4146-8552-54da231a6c4b",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "e6de239c-d822-499e-87d4-ebc533f56322",
+            "code": "no",
+            "system": "urn:uuid:ed8e60f2-8a4c-4146-8552-54da231a6c4b",
+            "display": "No"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "dpt3-date",
+      "type": "date",
+      "text": "Date DPT3 was given",
+      "required": false
+    },
+    {
+      "linkId": "was-measles-vaccine-given",
+      "type": "choice",
+      "text": "Was Measles  vaccine given?",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "e26f8853-c8ac-42ad-e59a-1d61db36c865",
+            "code": "yes",
+            "system": "urn:uuid:b266fcad-180c-418c-bc33-e03deffae5a0",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "df7d834b-249f-4cc2-c196-39d243e316b7",
+            "code": "no",
+            "system": "urn:uuid:b266fcad-180c-418c-bc33-e03deffae5a0",
+            "display": "No"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "measles-vaccine-date",
+      "type": "date",
+      "text": "Date Measles vaccine was given",
+      "required": false,
+      "enableWhen": [
+        {
+          "question": "was-measles-vaccine-given",
+          "operator": "=",
+          "answerCoding": {
+            "system": "urn:uuid:b266fcad-180c-418c-bc33-e03deffae5a0",
+            "code": "yes"
+          }
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/mimeType",
+          "valueCode": "image/*"
+        }
+      ],
+      "linkId": "vaccine-card-photo",
+      "text": "Take a picture of the vaccination card",
+      "type": "attachment",
+      "required": false,
+      "item": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-displayCategory",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/questionnaire-display-category",
+                    "code": "instructions"
+                  }
+                ]
+              }
+            }
+          ],
+          "linkId": "1-media-types-supported",
+          "text": "Media types supported: .jpg, .png, .mp3, .mp4, .pdf",
+          "type": "display"
+        }
+      ]
+    }
+  ]
+}
