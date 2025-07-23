@@ -128,16 +128,12 @@ group ExtractGroup(source src : QuestionnaireResponse, source location : Locatio
                     src -> coding.display = 'Household location' "r_cp_cod_disp_v";
                 } "r_grp_vcode";
             } "r_cp_cc_coding_v";
-            src -> groupCharacteristic.value = create('CodeableConcept') as locationValue then{
-                src -> locationValue.coding = create("Coding") as coding then {
-                    src -> coding.system = "https://smartregister.org/" "r_cp_cod_system_v";
-                    src -> coding.code = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) "r_cp_cod_value_v";
-                    src -> coding.display = 'Household location' "r_cp_cod_disp_v";
-                } "r_grp_vcode";
-            } "r_group_value_coding_v";
-            //src -> groupCharacteristic.value = create('Reference') as ref, ref.reference = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) "r_group_char_v";
+
+            src -> groupCharacteristic.value = create('Reference') as ref, ref.reference = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) "r_group_char_v";
             src -> groupCharacteristic.exclude = false "r_group_char_exclude_v";
        } "r_group_char_v";
+
+       src then ExtractList(src, location, group, bundle) "r_extract_list";
     } "r_group_bundle_entry";
 }
 
@@ -146,4 +142,23 @@ group ExtractFamilyCode(source src : Group, target concept: CodeableConcept) {
         src -> coding.display = 'Family' "r_cp_cod_disp";
 
     } "r_cp_cc_cod";
+}
+
+group ExtractList(source src : QuestionnaireResponse, source location : Location, source group : Group, target bundle : Bundle) {
+    src -> bundle.entry as entry, entry.resource = create("List") as list then {
+        src -> list.id = uuid() "r_list_id";
+        src -> list.status = 'current' "r_list_status";
+        src -> list.title = evaluate(location,  $this.name + ' related resources list') "r_list_title";
+        src -> list.subject = reference(location) "r_list-subject";
+        src -> list.code = create('CodeableConcept') as listCode then{
+             src -> listCode.coding = create("Coding") as coding then {
+                 src -> coding.system = "https://smartregister.org/" "r_cp_cod_system_v";
+                 src -> coding.code = 'related_resource_link' "r_cp_cod_value_v";
+                 src -> coding.display = 'Related resources list' "r_cp_cod_disp_v";
+             } "r_grp_vcode";
+        } "r_list_code_v";
+        src -> list.entry = create("List_Entry") as entry then {
+            src -> entry.item = reference(group) "r_list_group_entry";
+        } "r_list_entry";
+    } "r_list_bundle_entry";
 }
