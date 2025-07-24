@@ -31,7 +31,7 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
                 } "r_loc_level_3_meta_tag";
             } "r_loc_level_3_meta_exists";
     	} "r_loc_meta";
-    	src.item as locName where(linkId="location-name") and answer.count()>0 then {
+    	src.item as locName where(linkId="house-hold-head-name") and answer.count()>0 then {
     	    src -> loc.name = evaluate(locName, $this.answer.value) "r_loc_name";
     	} "r_loc_name_exists";
 
