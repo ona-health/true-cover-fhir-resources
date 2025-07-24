@@ -140,6 +140,16 @@
             }
           },
           "mode": "working"
+        },
+        {
+          "title": "Child Survey",
+          "focus": {
+            "reference": "StructureMap/truecover-child-survey-sm",
+            "identifier": {
+              "value": "childSurveySM"
+            }
+          },
+          "mode": "working"
         }
       ]
     },
