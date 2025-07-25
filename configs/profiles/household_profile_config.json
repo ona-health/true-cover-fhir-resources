@@ -176,45 +176,31 @@
               "registerCard": {
                 "rules": [
                   {
-                    "name": "patientFirstName",
+                    "name": "patientFullName",
                     "condition": "true",
                     "actions": [
-                      "data.put('patientFirstName', fhirPath.extractValue(Patient, \"Patient.name.where(use='official').given.first()\"))"
-                    ]
-                  },
-                  {
-                    "name": "patientMiddleName",
-                    "condition": "true",
-                    "actions": [
-                      "data.put('patientMiddleName', fhirPath.extractValue(Patient, \"Patient.name.where(use='official').select(text)\"))"
-                    ]
-                  },
-                  {
-                    "name": "patientLastName",
-                    "condition": "true",
-                    "actions": [
-                      "data.put('patientLastName', fhirPath.extractValue(Patient, \"Patient.name.where(use='official').select(family)\"))"
+                      "data.put('patientFullName', fhirPath.extractValue(availablePatients, \"Patient.name.where(use='official').select(text)\"))"
                     ]
                   },
                   {
                     "name": "patientAge",
                     "condition": "true",
                     "actions": [
-                      "data.put('patientAge', service.extractAge(Patient))"
+                      "data.put('patientAge', service.extractAge(availablePatients))"
                     ]
                   },
                   {
                     "name": "patientAgeInMonths",
                     "condition": "true",
                     "actions": [
-                      "data.put('patientAgeInMonths', fhirPath.extractValue(Patient, \"(((today().toString().substring(0, 4).toInteger() - Patient.birthDate.toString().substring(0, 4).toInteger()) * 12) + (today().toString().substring(5, 2).toInteger() - Patient.birthDate.toString().substring(5, 2).toInteger()) + ((today().toString().substring(8, 2).toInteger() - Patient.birthDate.toString().substring(8, 2).toInteger()) / 12)).toString().replaceMatches('[.]+[0-9]+', '').toInteger()\"))"
+                      "data.put('patientAgeInMonths', fhirPath.extractValue(availablePatients, \"(((today().toString().substring(0, 4).toInteger() - Patient.birthDate.toString().substring(0, 4).toInteger()) * 12) + (today().toString().substring(5, 2).toInteger() - Patient.birthDate.toString().substring(5, 2).toInteger()) + ((today().toString().substring(8, 2).toInteger() - Patient.birthDate.toString().substring(8, 2).toInteger()) / 12)).toString().replaceMatches('[.]+[0-9]+', '').toInteger()\"))"
                     ]
                   },
                   {
                     "name": "patientActive",
                     "condition": "true",
                     "actions": [
-                      "data.put('patientActive', fhirPath.extractValue(Patient, 'Patient.active'))"
+                      "data.put('patientActive', fhirPath.extractValue(availablePatients, 'Patient.active'))"
                     ]
                   },
                   {
@@ -228,21 +214,21 @@
                     "name": "patientGender",
                     "condition": "true",
                     "actions": [
-                      "data.put('patientGender', service.extractGender(Patient))"
+                      "data.put('patientGender', service.extractGender(availablePatients))"
                     ]
                   },
                   {
                     "name": "patientName",
                     "condition": "true",
                     "actions": [
-                      "data.put('patientName', data.get('patientFirstName') + ' ' + data.get('patientMiddleName') + ' ' + data.get('patientLastName') + ', ' + (data.get('patientGender') == 'Female'? 'F': data.get('patientGender') == 'Male'? 'M': data.get('patientGender')) + ', ' +  data.get('patientAge'))"
+                      "data.put('patientName', data.get('patientFullName') + ', ' + (data.get('patientGender') == 'Female'? 'F': data.get('patientGender') == 'Male'? 'M': data.get('patientGender')) + ', ' +  data.get('patientAge'))"
                     ]
                   },
                   {
                     "name": "patientLogicalId",
                     "condition": "true",
                     "actions": [
-                      "data.put('patientLogicalId', fhirPath.extractValue(Patient, 'Patient.id'))"
+                      "data.put('patientLogicalId', fhirPath.extractValue(availablePatients, 'Patient.id'))"
                     ]
                   }
                 ],
@@ -254,11 +240,6 @@
                         "viewType": "COMPOUND_TEXT",
                         "primaryText": "@{patientName}",
                         "primaryTextColor": "@{patientTextColor}"
-                      },
-                      {
-                        "viewType": "COMPOUND_TEXT",
-                        "primaryText": "@{statuses}",
-                        "primaryTextColor": "#939596"
                       }
                     ],
                     "actions": [
