@@ -37,11 +37,29 @@
   },
   "item": [
     {
-      "linkId": "location-name",
-      "text": "Name of the household",
+      "linkId": "survey-date",
+      "text": "Date of survey",
       "answer": [
         {
-          "valueString": "James Deer"
+          "valueDate": "2025-07-22"
+        }
+      ]
+    },
+    {
+      "linkId": "house-hold-head-name",
+      "text": "Head of household name?",
+      "answer": [
+        {
+          "valueString": "Pedro"
+        }
+      ]
+    },
+    {
+      "linkId": "phone-number",
+      "text": "What is the household phone number?",
+      "answer": [
+        {
+          "valueString": "12121212"
         }
       ]
     },
@@ -83,6 +101,7 @@
     },
     {
       "linkId": "positionLongitude",
+      "text": "Longitude",
       "answer": [
         {
           "valueString": "4.069375754048968"
@@ -91,6 +110,7 @@
     },
     {
       "linkId": "positionLatitude",
+      "text": "Latitude",
       "answer": [
         {
           "valueString": "39.090815109935846"

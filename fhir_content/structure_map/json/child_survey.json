@@ -1,0 +1,648 @@
+{
+  "resourceType": "StructureMap",
+  "id": "truecover-child-survey-sm",
+  "text": {
+    "status": "additional",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://hl7.org/fhir/StructureMap/truecover-child-survey-sm&quot; = 'True Cover Child Survey'\nuses &quot;http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse&quot; as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; as target\nuses &quot;http://hl7.org/fhir/StructureDefinition/Patient&quot; as target\n\n\ngroup ChildRegistration(source src : QuestionnaireResponse, target bundle: Bundle) {\n    src -&gt; bundle.id = uuid() &quot;rule_bundle_id&quot;;\n    src -&gt; bundle.type = 'collection' &quot;rule_bundle_type&quot;;\n    src -&gt; bundle.entry as entry, entry.resource = create('Patient') as patient then\n        ExtractPatient(src, patient, bundle) &quot;rule_bundle_entries&quot;;\n\n}\n\ngroup ExtractPatient(source src : QuestionnaireResponse, target patient : Patient, target bundle : Bundle) {\n    src -&gt; patient.id = uuid() &quot;rule_patient_id_generation&quot;;\n    // Use existing ID when in edit mode\n    src.subject as questionnaireResponseSubject -&gt; patient.id = create(&quot;id&quot;) as assignedId,\n        assignedId.value = evaluate(questionnaireResponseSubject, $this.reference.replace(&quot;Patient/&quot;, &quot;&quot;))\n    &quot;rule_assign_id&quot;;\n\n    src -&gt; patient.identifier = create('Identifier') as patientIdentifierOpenSRPId then {\n        src -&gt; patientIdentifierOpenSRPId.value = evaluate(src, $this.item.where(linkId = 'opensrp-id').answer.value)\n        &quot;rule_patient_identifier_opensrp_id_value&quot;;\n        src -&gt; patientIdentifierOpenSRPId.use = &quot;official&quot; &quot;rule_patient_identifier_opensrp_id_use&quot;;\n        src -&gt; patientIdentifierOpenSRPId.type = create('CodeableConcept') as IdType then {\n               src -&gt; IdType.coding = c(&quot;https://smartregister.org/&quot;, &quot;OPENSRP_ID&quot;) as coding then {\n                  src -&gt; coding.display = 'OPENSRP ID' &quot;r_type&quot;;\n               } &quot;r_id_type_code&quot;;\n        } &quot;r_cc_id_type&quot;;\n        src -&gt; patientIdentifierOpenSRPId.period = create('Period') as period, period.start = evaluate(src, $this.authored) &quot;rule_patient_identifier_period&quot;;\n    }  &quot;rule_patient_identifier_opensrp&quot;;\n\n    src -&gt; patient.name = create('HumanName') as patientName then {\n        // Patient name text without middle name\n        src -&gt; patientName.text = evaluate(src, $this.item.where(linkId = 'first-name').answer.value + ' ' + $this.item.where(linkId = 'last-name').answer.value) &quot;rule_patient_name_without_mid_name_text&quot;;\n\n        // Patient name text containing middle name\n        src.item as item where(linkId = 'middle-name') and answer.count()&gt;0  then {\n            src -&gt; patientName.text = evaluate(src, $this.item.where(linkId = 'first-name').answer.value + ' ' + $this.item.where(linkId = 'middle-name').answer.value  + ' ' + $this.item.where(linkId = 'last-name').answer.value) &quot;rule_patient_name_with_mid_name_text&quot;;\n        } &quot;rule_patient_with_mid_name&quot;;\n\n        src -&gt; patientName.given = evaluate(src, $this.item.where(linkId = 'first-name').answer.value) &quot;rule_patient_reporting_name_given&quot;;\n        src -&gt; patientName.family = evaluate(src, $this.item.where(linkId = 'last-name').answer.value) &quot;rule_patient_reporting_name_family&quot;;\n        src -&gt; patientName.use = 'official' &quot;rule_patient_name_use&quot;;\n    } &quot;rule_patient_name&quot;;\n\n    src -&gt; patient.gender = evaluate(src, $this.item.where(linkId = 'gender').answer.value.code) &quot;rule_patient_gender&quot;;\n\n\n    src.item as patient_dob where(linkId = 'date-of-birth') then {\n        patient_dob.answer first as patientBirthDateAnswer then {\n                patientBirthDateAnswer.value as val -&gt; patient.birthDate = val &quot;rule_patient_dob_answer&quot;;\n        } &quot;rule__first_patient_dob&quot;;\n    } &quot;rule_patient_dob&quot;;\n\n    src.item as patient_age where(linkId = 'age' and answer.value &gt; 0) -&gt;\n        patient.birthDate = evaluate(patient_age, today() - (($this.answer.value * 365.5).toString() + &quot; days&quot;).toQuantity()) &quot;rule_patient_age&quot;;\n\n    src -&gt; patient.active = true &quot;rule_patient_active&quot;;\n\n }</pre></div>"
+  },
+  "url": "http://hl7.org/fhir/StructureMap/truecover-child-survey-sm",
+  "name": "True Cover Child Survey",
+  "structure": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse",
+      "mode": "source"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Bundle",
+      "mode": "target"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/Patient",
+      "mode": "target"
+    }
+  ],
+  "group": [
+    {
+      "name": "ChildRegistration",
+      "typeMode": "none",
+      "input": [
+        {
+          "name": "src",
+          "type": "QuestionnaireResponse",
+          "mode": "source"
+        },
+        {
+          "name": "bundle",
+          "type": "Bundle",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "rule_bundle_id",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "contextType": "variable",
+              "element": "id",
+              "transform": "uuid"
+            }
+          ]
+        },
+        {
+          "name": "rule_bundle_type",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "contextType": "variable",
+              "element": "type",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueString": "collection"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rule_bundle_entries",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "bundle",
+              "contextType": "variable",
+              "element": "entry",
+              "variable": "entry"
+            },
+            {
+              "context": "entry",
+              "contextType": "variable",
+              "element": "resource",
+              "variable": "patient",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Patient"
+                }
+              ]
+            }
+          ],
+          "dependent": [
+            {
+              "name": "ExtractPatient",
+              "variable": [
+                "src",
+                "patient",
+                "bundle"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ExtractPatient",
+      "typeMode": "none",
+      "input": [
+        {
+          "name": "src",
+          "type": "QuestionnaireResponse",
+          "mode": "source"
+        },
+        {
+          "name": "patient",
+          "type": "Patient",
+          "mode": "target"
+        },
+        {
+          "name": "bundle",
+          "type": "Bundle",
+          "mode": "target"
+        }
+      ],
+      "rule": [
+        {
+          "name": "rule_patient_id_generation",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "patient",
+              "contextType": "variable",
+              "element": "id",
+              "transform": "uuid"
+            }
+          ]
+        },
+        {
+          "name": "rule_assign_id",
+          "source": [
+            {
+              "context": "src",
+              "element": "subject",
+              "variable": "questionnaireResponseSubject"
+            }
+          ],
+          "target": [
+            {
+              "context": "patient",
+              "contextType": "variable",
+              "element": "id",
+              "variable": "assignedId",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "id"
+                }
+              ]
+            },
+            {
+              "context": "assignedId",
+              "contextType": "variable",
+              "element": "value",
+              "transform": "evaluate",
+              "parameter": [
+                {
+                  "valueId": "questionnaireResponseSubject"
+                },
+                {
+                  "valueString": "$this.reference.replace('Patient/', '')"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rule_patient_identifier_opensrp",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "patient",
+              "contextType": "variable",
+              "element": "identifier",
+              "variable": "patientIdentifierOpenSRPId",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "Identifier"
+                }
+              ]
+            }
+          ],
+          "rule": [
+            {
+              "name": "rule_patient_identifier_opensrp_id_value",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "patientIdentifierOpenSRPId",
+                  "contextType": "variable",
+                  "element": "value",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueString": "$this.item.where(linkId = 'opensrp-id').answer.value"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rule_patient_identifier_opensrp_id_use",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "patientIdentifierOpenSRPId",
+                  "contextType": "variable",
+                  "element": "use",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "official"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "r_cc_id_type",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "patientIdentifierOpenSRPId",
+                  "contextType": "variable",
+                  "element": "type",
+                  "variable": "IdType",
+                  "transform": "create",
+                  "parameter": [
+                    {
+                      "valueString": "CodeableConcept"
+                    }
+                  ]
+                }
+              ],
+              "rule": [
+                {
+                  "name": "r_id_type_code",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "IdType",
+                      "contextType": "variable",
+                      "element": "coding",
+                      "variable": "coding",
+                      "transform": "c",
+                      "parameter": [
+                        {
+                          "valueString": "https://smartregister.org/"
+                        },
+                        {
+                          "valueString": "OPENSRP_ID"
+                        }
+                      ]
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_type",
+                      "source": [
+                        {
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "coding",
+                          "contextType": "variable",
+                          "element": "display",
+                          "transform": "copy",
+                          "parameter": [
+                            {
+                              "valueString": "OPENSRP ID"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rule_patient_identifier_period",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "patientIdentifierOpenSRPId",
+                  "contextType": "variable",
+                  "element": "period",
+                  "variable": "period",
+                  "transform": "create",
+                  "parameter": [
+                    {
+                      "valueString": "Period"
+                    }
+                  ]
+                },
+                {
+                  "context": "period",
+                  "contextType": "variable",
+                  "element": "start",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueString": "$this.authored"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rule_patient_name",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "patient",
+              "contextType": "variable",
+              "element": "name",
+              "variable": "patientName",
+              "transform": "create",
+              "parameter": [
+                {
+                  "valueString": "HumanName"
+                }
+              ]
+            }
+          ],
+          "rule": [
+            {
+              "name": "rule_patient_name_without_mid_name_text",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "patientName",
+                  "contextType": "variable",
+                  "element": "text",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueString": "$this.item.where(linkId = 'first-name').answer.value + ' ' + $this.item.where(linkId = 'last-name').answer.value"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rule_patient_with_mid_name",
+              "source": [
+                {
+                  "context": "src",
+                  "element": "item",
+                  "variable": "item",
+                  "condition": "(linkId = 'middle-name') and (answer.count() > 0)"
+                }
+              ],
+              "rule": [
+                {
+                  "name": "rule_patient_name_with_mid_name_text",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "patientName",
+                      "contextType": "variable",
+                      "element": "text",
+                      "transform": "evaluate",
+                      "parameter": [
+                        {
+                          "valueId": "src"
+                        },
+                        {
+                          "valueString": "$this.item.where(linkId = 'first-name').answer.value + ' ' + $this.item.where(linkId = 'middle-name').answer.value + ' ' + $this.item.where(linkId = 'last-name').answer.value"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rule_patient_reporting_name_given",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "patientName",
+                  "contextType": "variable",
+                  "element": "given",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueString": "$this.item.where(linkId = 'first-name').answer.value"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rule_patient_reporting_name_family",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "patientName",
+                  "contextType": "variable",
+                  "element": "family",
+                  "transform": "evaluate",
+                  "parameter": [
+                    {
+                      "valueId": "src"
+                    },
+                    {
+                      "valueString": "$this.item.where(linkId = 'last-name').answer.value"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rule_patient_name_use",
+              "source": [
+                {
+                  "context": "src"
+                }
+              ],
+              "target": [
+                {
+                  "context": "patientName",
+                  "contextType": "variable",
+                  "element": "use",
+                  "transform": "copy",
+                  "parameter": [
+                    {
+                      "valueString": "official"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rule_patient_gender",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "patient",
+              "contextType": "variable",
+              "element": "gender",
+              "transform": "evaluate",
+              "parameter": [
+                {
+                  "valueId": "src"
+                },
+                {
+                  "valueString": "$this.item.where(linkId = 'gender').answer.value.code"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rule_patient_dob",
+          "source": [
+            {
+              "context": "src",
+              "element": "item",
+              "variable": "patient_dob",
+              "condition": "(linkId = 'date-of-birth')"
+            }
+          ],
+          "rule": [
+            {
+              "name": "rule__first_patient_dob",
+              "source": [
+                {
+                  "context": "patient_dob",
+                  "element": "answer",
+                  "listMode": "first",
+                  "variable": "patientBirthDateAnswer"
+                }
+              ],
+              "rule": [
+                {
+                  "name": "rule_patient_dob_answer",
+                  "source": [
+                    {
+                      "context": "patientBirthDateAnswer",
+                      "element": "value",
+                      "variable": "val"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "patient",
+                      "contextType": "variable",
+                      "element": "birthDate",
+                      "transform": "copy",
+                      "parameter": [
+                        {
+                          "valueId": "val"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rule_patient_age",
+          "source": [
+            {
+              "context": "src",
+              "element": "item",
+              "variable": "patient_age",
+              "condition": "((linkId = 'age') and (answer.value > 0))"
+            }
+          ],
+          "target": [
+            {
+              "context": "patient",
+              "contextType": "variable",
+              "element": "birthDate",
+              "transform": "evaluate",
+              "parameter": [
+                {
+                  "valueId": "patient_age"
+                },
+                {
+                  "valueString": "today() - (($this.answer.value * 365.5).toString() + ' days').toQuantity()"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "rule_patient_active",
+          "source": [
+            {
+              "context": "src"
+            }
+          ],
+          "target": [
+            {
+              "context": "patient",
+              "contextType": "variable",
+              "element": "active",
+              "transform": "copy",
+              "parameter": [
+                {
+                  "valueBoolean": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -75,6 +75,20 @@
         "resource": "Location",
         "searchParameter": "partof",
         "isRevInclude": false
+      },
+      {
+        "id": "relatedLists",
+        "resource": "List",
+        "searchParameter": "subject",
+        "isRevInclude": true,
+        "relatedResources": [
+          {
+            "id": "relatedGroups",
+            "resource": "Group",
+            "searchParameter": "item",
+            "isRevInclude": false
+          }
+        ]
       }
     ]
   },
@@ -139,11 +153,11 @@
   "servicePointConfig": {
     "rules": [
       {
-        "name": "householdId",
+        "name": "familyLogicalId",
         "condition": "true",
         "priority": 1,
         "actions": [
-          "data.put('householdId', fhirPath.extractValue(Location, \"Location.id\"))"
+          "data.put('familyLogicalId', fhirPath.extractValue(relatedGroups.get(0), \"Group.id\"))"
         ]
       },
       {
@@ -201,7 +215,8 @@
     "servicePointProperties": {
       "visitStatus": "@{visitStatus}",
       "name": "@{name}",
-      "status": "@{status}"
+      "status": "@{status}",
+      "familyLogicalId": "@{familyLogicalId}"
     }
   },
   "topScreenSection": {
@@ -325,7 +340,7 @@
                       {
                         "viewType": "BUTTON",
                         "smallSized": true,
-                        "text": "Household Survey",
+                        "text": "Household Profile",
                         "status": "DUE",
                         "alignment": "CENTER",
                         "startIcon": {
@@ -337,14 +352,16 @@
                         "actions": [
                           {
                             "trigger": "ON_CLICK",
-                            "workflow": "LAUNCH_QUESTIONNAIRE",
-                            "questionnaire": {
-                              "id": "truecover-household-survey",
-                              "title": "Household Survey",
-                              "saveButtonText": "Save",
-                              "resourceType": "Location",
-                              "resourceIdentifier": "@{householdId}"
-                            }
+                            "workflow": "LAUNCH_PROFILE",
+                            "id": "householdProfile",
+                            "params": [
+                              {
+                                "paramType": "RESOURCE_ID",
+                                "key": "familyLogicalId",
+                                "value": "@{familyLogicalId}"
+                              }
+                            ]
+
                           }
                         ]
                       }

@@ -1,0 +1,62 @@
+map "http://hl7.org/fhir/StructureMap/truecover-child-survey-sm" = 'True Cover Child Survey'
+uses "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse" as source
+uses "http://hl7.org/fhir/StructureDefinition/Bundle" as target
+uses "http://hl7.org/fhir/StructureDefinition/Patient" as target
+
+
+group ChildRegistration(source src : QuestionnaireResponse, target bundle: Bundle) {
+    src -> bundle.id = uuid() "rule_bundle_id";
+    src -> bundle.type = 'collection' "rule_bundle_type";
+    src -> bundle.entry as entry, entry.resource = create('Patient') as patient then
+        ExtractPatient(src, patient, bundle) "rule_bundle_entries";
+
+}
+
+group ExtractPatient(source src : QuestionnaireResponse, target patient : Patient, target bundle : Bundle) {
+    src -> patient.id = uuid() "rule_patient_id_generation";
+    // Use existing ID when in edit mode
+    src.subject as questionnaireResponseSubject -> patient.id = create("id") as assignedId,
+        assignedId.value = evaluate(questionnaireResponseSubject, $this.reference.replace("Patient/", ""))
+    "rule_assign_id";
+
+    src -> patient.identifier = create('Identifier') as patientIdentifierOpenSRPId then {
+        src -> patientIdentifierOpenSRPId.value = evaluate(src, $this.item.where(linkId = 'opensrp-id').answer.value)
+        "rule_patient_identifier_opensrp_id_value";
+        src -> patientIdentifierOpenSRPId.use = "official" "rule_patient_identifier_opensrp_id_use";
+        src -> patientIdentifierOpenSRPId.type = create('CodeableConcept') as IdType then {
+               src -> IdType.coding = c("https://smartregister.org/", "OPENSRP_ID") as coding then {
+                  src -> coding.display = 'OPENSRP ID' "r_type";
+               } "r_id_type_code";
+        } "r_cc_id_type";
+        src -> patientIdentifierOpenSRPId.period = create('Period') as period, period.start = evaluate(src, $this.authored) "rule_patient_identifier_period";
+    }  "rule_patient_identifier_opensrp";
+
+    src -> patient.name = create('HumanName') as patientName then {
+        // Patient name text without middle name
+        src -> patientName.text = evaluate(src, $this.item.where(linkId = 'first-name').answer.value + ' ' + $this.item.where(linkId = 'last-name').answer.value) "rule_patient_name_without_mid_name_text";
+
+        // Patient name text containing middle name
+        src.item as item where(linkId = 'middle-name') and answer.count()>0  then {
+            src -> patientName.text = evaluate(src, $this.item.where(linkId = 'first-name').answer.value + ' ' + $this.item.where(linkId = 'middle-name').answer.value  + ' ' + $this.item.where(linkId = 'last-name').answer.value) "rule_patient_name_with_mid_name_text";
+        } "rule_patient_with_mid_name";
+
+        src -> patientName.given = evaluate(src, $this.item.where(linkId = 'first-name').answer.value) "rule_patient_reporting_name_given";
+        src -> patientName.family = evaluate(src, $this.item.where(linkId = 'last-name').answer.value) "rule_patient_reporting_name_family";
+        src -> patientName.use = 'official' "rule_patient_name_use";
+    } "rule_patient_name";
+
+    src -> patient.gender = evaluate(src, $this.item.where(linkId = 'gender').answer.value.code) "rule_patient_gender";
+
+
+    src.item as patient_dob where(linkId = 'date-of-birth') then {
+        patient_dob.answer first as patientBirthDateAnswer then {
+                patientBirthDateAnswer.value as val -> patient.birthDate = val "rule_patient_dob_answer";
+        } "rule__first_patient_dob";
+    } "rule_patient_dob";
+
+    src.item as patient_age where(linkId = 'age' and answer.value > 0) ->
+        patient.birthDate = evaluate(patient_age, today() - (($this.answer.value * 365.5).toString() + " days").toQuantity()) "rule_patient_age";
+
+    src -> patient.active = true "rule_patient_active";
+
+ }

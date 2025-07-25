@@ -1,0 +1,269 @@
+{
+  "appId": "truecover",
+  "configType": "profile",
+  "id": "householdProfile",
+  "fhirResource": {
+    "baseResource": {
+      "resource": "Group",
+      "dataQueries": [
+        {
+          "paramName": "type",
+          "filterCriteria": [
+            {
+              "dataType": "CODING",
+              "value": {
+                "system": "http://hl7.org/fhir/group-type",
+                "code": "person"
+              }
+            }
+          ]
+        },
+        {
+          "paramName": "code",
+          "filterCriteria": [
+            {
+              "dataType": "CODEABLECONCEPT",
+              "value": {
+                "system": "https://www.snomed.org",
+                "code": "35359004"
+              }
+            }
+          ]
+        }
+      ],
+      "sortConfigs": [
+        {
+          "paramName": "_lastUpdated",
+          "dataType": "DATE",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    "relatedResources": [
+      {
+        "id": "availablePatients",
+        "resource": "Patient",
+        "searchParameter": "member",
+        "isRevInclude": false,
+        "relatedResources": [],
+        "sortConfigs": [
+          {
+            "paramName": "_lastUpdated",
+            "dataType": "DATE",
+            "order": "DESCENDING"
+          }
+        ]
+      }
+    ]
+  },
+  "fabActions": [
+    {
+      "id": "ActionButton",
+      "visible": true,
+      "display": "{{ add.member }}",
+      "menuIconConfig": {
+        "type": "local",
+        "reference": "ic_add"
+      },
+      "actions": [
+        {
+          "trigger": "ON_CLICK",
+          "workflow": "LAUNCH_QUESTIONNAIRE",
+          "questionnaire": {
+            "id": "truecover-child-survey",
+            "title": "Add child",
+            "saveButtonText": "Add Child",
+            "groupResource": {
+              "groupIdentifier": "@{familyLogicalId}",
+              "memberResourceType": "Patient"
+            },
+            "snackBarMessage": {
+              "message": "Child has been added",
+              "actionLabel": "",
+              "duration": "Short"
+            }
+          },
+          "params": [
+            {
+              "paramType": "PREPOPULATE",
+              "linkId": "opensrp-id",
+              "dataType": "INTEGER",
+              "key": "opensrpId",
+              "value": "@{humanReadableId}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "name": "familyName",
+      "condition": "true",
+      "actions": [
+        "data.put('familyName', fhirPath.extractValue(Group, 'Group.name'))"
+      ]
+    },
+    {
+      "name": "familyId",
+      "condition": "true",
+      "actions": [
+        "data.put('familyId', fhirPath.extractValue(Group, \"Group.identifier.where(use='official').value\"))"
+      ]
+    },
+    {
+      "name": "familyStatus",
+      "condition": "true",
+      "actions": [
+        "data.put('familyStatus', fhirPath.extractValue(Group, 'Group.active'))"
+      ]
+    },
+    {
+      "name": "familyLogicalId",
+      "condition": "true",
+      "actions": [
+        "data.put('familyLogicalId', fhirPath.extractValue(Group, 'Group.id'))"
+      ]
+    },
+    {
+      "name": "humanReadableId",
+      "condition": "true",
+      "actions": [
+        "data.put('humanReadableId', service.generateRandomSixDigitInt())"
+      ]
+    }
+  ],
+  "views": [
+    {
+      "viewType": "COLUMN",
+      "children": [
+        {
+          "viewType": "COLUMN",
+          "backgroundColor": "primaryColor",
+          "fillMaxWidth": true,
+          "padding": 8,
+          "children": [
+            {
+              "viewType": "COMPOUND_TEXT",
+              "primaryText": "@{familyName} Family",
+              "primaryTextColor": "#FFFFFF",
+              "fontSize": 20.0
+            }
+          ]
+        },
+        {
+          "viewType": "CARD",
+          "header": {
+            "viewType": "COMPOUND_TEXT",
+            "primaryText": "HOUSEHOLD MEMBERS",
+            "primaryTextColor": "#6F7274",
+            "fontSize": 18.0,
+            "padding": 16
+          },
+          "content": [
+            {
+              "id": "patients",
+              "viewType": "LIST",
+              "resources": [
+                {
+                  "id": "availablePatients",
+                  "relatedResourceId": "availablePatients",
+                  "resourceType": "Patient",
+                  "conditionalFhirPathExpression": "Patient.active = 'true' or Patient.active = 'false'",
+                  "relatedResources": []
+                }
+              ],
+              "registerCard": {
+                "rules": [
+                  {
+                    "name": "patientFullName",
+                    "condition": "true",
+                    "actions": [
+                      "data.put('patientFullName', fhirPath.extractValue(availablePatients, \"Patient.name.where(use='official').select(text)\"))"
+                    ]
+                  },
+                  {
+                    "name": "patientAge",
+                    "condition": "true",
+                    "actions": [
+                      "data.put('patientAge', service.extractAge(availablePatients))"
+                    ]
+                  },
+                  {
+                    "name": "patientAgeInMonths",
+                    "condition": "true",
+                    "actions": [
+                      "data.put('patientAgeInMonths', fhirPath.extractValue(availablePatients, \"(((today().toString().substring(0, 4).toInteger() - Patient.birthDate.toString().substring(0, 4).toInteger()) * 12) + (today().toString().substring(5, 2).toInteger() - Patient.birthDate.toString().substring(5, 2).toInteger()) + ((today().toString().substring(8, 2).toInteger() - Patient.birthDate.toString().substring(8, 2).toInteger()) / 12)).toString().replaceMatches('[.]+[0-9]+', '').toInteger()\"))"
+                    ]
+                  },
+                  {
+                    "name": "patientActive",
+                    "condition": "true",
+                    "actions": [
+                      "data.put('patientActive', fhirPath.extractValue(availablePatients, 'Patient.active'))"
+                    ]
+                  },
+                  {
+                    "name": "patientTextColor",
+                    "condition": "true",
+                    "actions": [
+                      "data.put('patientTextColor', Patient.active ? '#000000' : 'DefaultColor')"
+                    ]
+                  },
+                  {
+                    "name": "patientGender",
+                    "condition": "true",
+                    "actions": [
+                      "data.put('patientGender', service.extractGender(availablePatients))"
+                    ]
+                  },
+                  {
+                    "name": "patientName",
+                    "condition": "true",
+                    "actions": [
+                      "data.put('patientName', data.get('patientFullName') + ', ' + (data.get('patientGender') == 'Female'? 'F': data.get('patientGender') == 'Male'? 'M': data.get('patientGender')) + ', ' +  data.get('patientAge'))"
+                    ]
+                  },
+                  {
+                    "name": "patientLogicalId",
+                    "condition": "true",
+                    "actions": [
+                      "data.put('patientLogicalId', fhirPath.extractValue(availablePatients, 'Patient.id'))"
+                    ]
+                  }
+                ],
+                "views": [
+                  {
+                    "viewType": "SERVICE_CARD",
+                    "details": [
+                      {
+                        "viewType": "COMPOUND_TEXT",
+                        "primaryText": "@{patientName}",
+                        "primaryTextColor": "@{patientTextColor}"
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "trigger": "ON_CLICK",
+                        "workflow": "LAUNCH_QUESTIONNAIRE",
+                        "questionnaire": {
+                          "id": "truecover-child-survey",
+                          "title": "Child Survey",
+                          "saveButtonText": "Save",
+                          "resourceIdentifier": "@{patientLogicalId}"
+                        },
+                        "params": []
+                      }
+                    ],
+                    "params": []
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "overFlowMenuItems": []
+}
