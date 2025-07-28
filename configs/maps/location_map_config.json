@@ -89,6 +89,12 @@
             "isRevInclude": false
           }
         ]
+      },
+      {
+        "id": "relatedTasks",
+        "resource": "Task",
+        "searchParameter": "subject",
+        "isRevInclude": true
       }
     ]
   },
@@ -189,26 +195,19 @@
         ]
       },
       {
-        "name": "relatedParentLoc",
-        "condition": "true",
-        "actions": [
-          "data.put('relatedParentLoc', relatedParentLocations)"
-        ]
-      },
-      {
-        "name": "getHouseholdDistance",
+        "name": "mostRecentHHSurveyTaskStatus",
         "condition": "true",
         "priority": 1,
         "actions": [
-          "data.put('getHouseholdDistance', locationService.calculateDistanceByGpsLocation(Location))"
+          "data.put('mostRecentHHSurveyTaskStatus', (size(relatedTasks) > 0) ?  service.generateTaskServiceStatus(relatedTasks.get(0)) : '')"
         ]
       },
       {
-        "name": "getHouseholdDistanceRetrieved",
+        "name": "visitStatus",
         "condition": "true",
         "priority": 2,
         "actions": [
-          "data.put('getHouseholdDistanceRetrieved', data.get('getHouseholdDistance') != null ? data.get('getHouseholdDistance') : 'GPS unknown')"
+          "data.put('visitStatus', data.get('mostRecentHHSurveyTaskStatus')== 'COMPLETED' ? 'finished' : 'not_started')"
         ]
       }
     ],

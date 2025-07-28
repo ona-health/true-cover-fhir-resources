@@ -134,6 +134,7 @@ group ExtractGroup(source src : QuestionnaireResponse, source location : Locatio
        } "r_group_char_v";
 
        src then ExtractList(src, location, group, bundle) "r_extract_list";
+       src then  ExtractTask(src, location, bundle) "r_extract_task";
     } "r_group_bundle_entry";
 }
 
@@ -161,4 +162,57 @@ group ExtractList(source src : QuestionnaireResponse, source location : Location
             src -> entry.item = reference(group) "r_list_group_entry";
         } "r_list_entry";
     } "r_list_bundle_entry";
+}
+
+group ExtractTask(source src : QuestionnaireResponse, source location : Location, target bundle : Bundle){
+    src -> bundle.entry as entry, entry.resource = create('Task') as task then {
+        src -> task.id = uuid(),
+               task.identifier = create('Identifier') as iden, iden.value = 'hh_survey', iden.use = 'official',
+               task.status = 'completed',
+               task.intent = 'plan',
+               task.priority = 'routine',
+               task.description = 'Household Survey',
+               task.for = create('Reference') as ref, ref.reference = evaluate(location, type().name + '/' + $this.id.replaceMatches('/_history/.*', '')),
+               task.authoredOn = evaluate(src, now()),
+               task.requester = evaluate(src, $this.generalPractitioner.first()),
+               task.owner = evaluate(src, $this.generalPractitioner.first()) "r_task_data";
+
+        src then extractPeriod(src, task) "r_task_period_extr";
+
+        src -> task.reasonReference = create('Reference') as ref,
+                       ref.reference = 'Questionnaire/truecover-add-location' "r_task_reason_ref";
+
+        src -> task.code = create('CodeableConcept') as taskCode then{
+                    src -> taskCode.coding = create("Coding") as coding then {
+                        src -> coding.system = "https://smartregister.org/" "r_cp_cod_system_v";
+                        src -> coding.code = 'hh_survey' "r_cp_cod_value_v";
+                        src -> coding.display = 'Hosehold Survey' "r_cp_cod_disp_v";
+                    } "r_grp_vcode";
+                    src -> taskCode.text = 'Hosehold Survey' "r_code_text";
+        } "r_task_code_v";
+    } "r_task_bundle_entry";
+}
+
+group extractPeriod(source subject: Location, target task: Task) {
+    subject -> evaluate(task, now()) as start, evaluate(task, now()) as end then {
+        subject -> create('Period') as period then {
+
+         subject -> create('date') as startDate,
+                    startDate.value = evaluate(start, $this.value.substring(0,7) + '-01'),
+                    create('date') as maxMonth,
+                    maxMonth.value = evaluate(end, $this.value.substring(0,7) + '-01'),
+                    evaluate(maxMonth, $this + '365 \'days\''.toQuantity()) as endDate
+                    then extractPeriodTime(startDate, endDate, period) "r_task_period_extr";
+
+            subject -> task.executionPeriod = period "r_task_per";
+        } "rule_period";
+    } "r_per";
+}
+
+group extractPeriodTime(source start: DateType, source end: DateType, target period: Period) {
+    start -> period.start = create('dateTime') as dt,
+             dt.value = evaluate(start, $this.value.substring(0,10) + 'T00:00:00.00Z') "r_per_start";
+
+    end -> period.end = create('dateTime') as dt,
+           dt.value = evaluate(end, $this.value.substring(0,10) + 'T00:00:00.00Z') "r_per_end";
 }
