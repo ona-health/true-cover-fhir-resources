@@ -3,7 +3,7 @@
   "id": "truecover-add-location-sm",
   "text": {
     "status": "additional",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://hl7.org/fhir/StructureMap/truecover-add-location-sm&quot; = 'True Cover Add Location'\nuses &quot;http://hl7.org/fhir/StructureDefinition/QuestionnaireReponse&quot; as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; as target\n\ngroup AddLocation(source src : QuestionnaireResponse, target bundle: Bundle) {\n    src -&gt; bundle.type = &quot;collection&quot; &quot;r_bundle_type&quot;;\n    src then ExtractLocation(src, bundle)&quot;r_bundle_entries&quot;;\n}\n\ngroup ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;Location&quot;) as loc then {\n    \tsrc -&gt; loc.id = uuid() &quot;r_loc_id&quot;;\n    \tsrc -&gt; loc.status =  &quot;active&quot; &quot;r_loc_status&quot;;\n    \tsrc -&gt; loc.meta = create(&quot;Meta&quot;) as meta then {\n    \t    src.item as province where(linkId=&quot;select-province&quot;) and answer.count()&gt;0 then {\n                src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = evaluate(province, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_1_meta_code&quot;;\n                    src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_1_meta_system&quot;;\n                } &quot;r_loc_level_1_meta_tag&quot;;\n            } &quot;r_loc_level_1_meta_exists&quot;;\n            src.item as district where(linkId=&quot;select-district&quot;) and answer.count()&gt;0 then {\n                src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = evaluate(district, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_2_meta_code&quot;;\n                    src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_2_meta_system&quot;;\n                } &quot;r_loc_level_2_meta_tag&quot;;\n            } &quot;r_loc_level_2_meta_exists&quot;;\n            src.item as operationalArea where(linkId=&quot;select-operational-area&quot;) and answer.count()&gt;0 then {\n                src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = evaluate(operationalArea, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_3_meta_code&quot;;\n                    src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_3_meta_system&quot;;\n                } &quot;r_loc_level_3_meta_tag&quot;;\n            } &quot;r_loc_level_3_meta_exists&quot;;\n    \t} &quot;r_loc_meta&quot;;\n    \tsrc.item as locName where(linkId=&quot;house-hold-head-name&quot;) and answer.count()&gt;0 then {\n    \t    src -&gt; loc.name = evaluate(locName, $this.answer.value) &quot;r_loc_name&quot;;\n    \t} &quot;r_loc_name_exists&quot;;\n\n    \t// Extract lat/long from dropped pin\n    \tsrc.item as locLon where(linkId=&quot;positionLongitude&quot;) and answer.count()&gt;0 then {\n    \t    src.item as locLat where(linkId=&quot;positionLatitude&quot;) and answer.count()&gt;0 then {\n                src -&gt; loc.position = create(&quot;Location_Position&quot;) as pos then {\n                    src -&gt; pos.longitude = evaluate(locLon, $this.answer.value)&quot;r_loc_long&quot;;\n                    src -&gt; pos.latitude = evaluate(locLat, $this.answer.value) &quot;r_loc_lat&quot;;\n                } &quot;r_loc_pos&quot;;\n            } &quot;r_loc_lat_exists&quot;;\n        } &quot;r_loc_lon_exists&quot;;\n\n        // Extract lat/long from GPS coordinates\n       src.item as locationWidgetItem where(linkId='location-widget') then {\n           src -&gt; loc.position = create(&quot;Location_Position&quot;) as position then {\n                locationWidgetItem.item as itemLatitude where(linkId='latitude') then {\n                   src -&gt; position.latitude = evaluate(src, itemLatitude.answer.value) &quot;r-position-latitude&quot;;\n               } &quot;r-latitude-item&quot;;\n               locationWidgetItem.item as itemLongitude where(linkId='longitude') then {\n                   src -&gt; position.longitude = evaluate(src, itemLongitude.answer.value) &quot;r-position-longitude&quot;;\n               } &quot;r-longitude-item&quot;;\n           } &quot;r_position_data&quot;;\n       } &quot;r_loc_widget&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_building_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_building_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_building_loc_type_system&quot;;\n                } &quot;r_building_loc_type_coding&quot;;\n        } &quot;r_building_loc_type&quot;;\n\n        src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n            src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;5&quot; &quot;r_admin_level_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Level 5&quot; &quot;r_admin_level_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;https://smartregister.org/codes/administrative-level&quot; &quot;r_admin_level_loc_type_system&quot;;\n            } &quot;r_admin_level_loc_type_coding&quot;;\n        } &quot;r_admin_level_loc_type_concept&quot;;\n\n        src -&gt; loc.physicalType = create(&quot;CodeableConcept&quot;) as concept then {\n             src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                src -&gt; coding.code = &quot;bu&quot; &quot;r_loc_type_code&quot;;\n                src -&gt; coding.display = &quot;Building&quot; &quot;r_loc_type_display&quot;;\n                src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_loc_type_system&quot;;\n            } &quot;r_loc_type_coding&quot;;\n        } &quot;r_loc_type_concept&quot;;\n\n        src.item as parentLoc where(linkId=&quot;select-operational-area&quot;) and answer.count()&gt;0 then {\n            src -&gt; loc.partOf = create(&quot;Reference&quot;) as ref then {\n                src -&gt; ref.reference = evaluate(parentLoc, $this.answer.value.reference) &quot;r_loc_part_of&quot;;\n                src -&gt; ref.display = evaluate(parentLoc, $this.answer.value.display)  &quot;r_loc_part_of_display&quot;;\n            } &quot;r_loc_part_of_ref&quot;;\n        } &quot;r_parent_location&quot;;\n\n        src then ExtractGroup(src, loc ,bundle) &quot;r_extract_group&quot;;\n    } &quot;r_loc&quot;;\n}\n\ngroup ExtractGroup(source src : QuestionnaireResponse, source location : Location, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;Group&quot;) as group then {\n       src -&gt; group.id = uuid() &quot;rule_group_id_value&quot;;\n       src -&gt; group.name = evaluate(src, $this.item.where(linkId = 'house-hold-head-name').answer.value) &quot;rule_group_name&quot;;\n\n       src -&gt; group.identifier = create('Identifier') as groupIdentifier then {\n          src -&gt; groupIdentifier.value = uuid() &quot;rule_group_identifier_value&quot;;\n          src -&gt; groupIdentifier.use = &quot;secondary&quot; &quot;rule_group_identifier_use&quot;;\n          src -&gt; groupIdentifier.period = create('Period') as period, period.start = evaluate(src, $this.authored) &quot;rule_group_identifier_period&quot;;\n       } &quot;rule_group_identifier&quot;;\n\n       src -&gt; group.active = true &quot;r_grp_status_data&quot;;\n\n       src -&gt; group.characteristic = create('Group_Characteristic') as includeFamily then {\n           src -&gt; includeFamily.exclude = false &quot;rule_exclude_group_false&quot;;\n       } &quot;rule_group_char&quot;;\n\n       src -&gt; group.characteristic = create('Group_Characteristic') as familyCharacteristic then {\n           src -&gt; familyCharacteristic.code = create('CodeableConcept') as familyCharacteristicCode then{\n               src -&gt; familyCharacteristicCode.coding = c(&quot;https://smartregister.org/&quot;, &quot;active&quot;) as coding then {\n               src -&gt; coding.display = 'Active' &quot;r_cp_cod_disp_v&quot;;\n               } &quot;r_grp_vcode&quot;;\n           } &quot;rule_group_char_code&quot;;\n       } &quot;rule_group_char&quot;;\n\n       src -&gt; group.type = 'person' &quot;r_grp_type_data&quot;;\n       src -&gt; group.actual = true &quot;r_grp_actual_data&quot;;\n       src -&gt; group.code = create('CodeableConcept') as concept then ExtractFamilyCode(src, concept) &quot;r_grp_code_data&quot;;\n\n        // Add location characteristic\n       src -&gt; group.characteristic = create ('Group_Characteristic') as groupCharacteristic then {\n            src -&gt; groupCharacteristic.code = create('CodeableConcept') as locationCode then{\n                src -&gt; locationCode.coding = c(&quot;https://smartregister.org/&quot;, &quot;hh_location&quot;) as coding then {\n                    src -&gt; coding.display = 'Household location' &quot;r_cp_cod_disp_v&quot;;\n                } &quot;r_grp_vcode&quot;;\n            } &quot;r_cp_cc_coding_v&quot;;\n\n            src -&gt; groupCharacteristic.value = create('Reference') as ref, ref.reference = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) &quot;r_group_char_v&quot;;\n            src -&gt; groupCharacteristic.exclude = false &quot;r_group_char_exclude_v&quot;;\n       } &quot;r_group_char_v&quot;;\n\n       src then ExtractList(src, location, group, bundle) &quot;r_extract_list&quot;;\n       src then  ExtractTask(src, location, bundle) &quot;r_extract_task&quot;;\n    } &quot;r_group_bundle_entry&quot;;\n}\n\ngroup ExtractFamilyCode(source src : Group, target concept: CodeableConcept) {\n    src -&gt; concept.coding = c(&quot;https://www.snomed.org&quot;, &quot;35359004&quot;) as coding then {\n        src -&gt; coding.display = 'Family' &quot;r_cp_cod_disp&quot;;\n\n    } &quot;r_cp_cc_cod&quot;;\n}\n\ngroup ExtractList(source src : QuestionnaireResponse, source location : Location, source group : Group, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;List&quot;) as list then {\n        src -&gt; list.id = uuid() &quot;r_list_id&quot;;\n        src -&gt; list.status = 'current' &quot;r_list_status&quot;;\n        src -&gt; list.title = evaluate(location,  $this.name + ' related resources list') &quot;r_list_title&quot;;\n        src -&gt; list.subject = reference(location) &quot;r_list-subject&quot;;\n        src -&gt; list.code = create('CodeableConcept') as listCode then{\n             src -&gt; listCode.coding = create(&quot;Coding&quot;) as coding then {\n                 src -&gt; coding.system = &quot;https://smartregister.org/&quot; &quot;r_cp_cod_system_v&quot;;\n                 src -&gt; coding.code = 'related_resource_link' &quot;r_cp_cod_value_v&quot;;\n                 src -&gt; coding.display = 'Related resources list' &quot;r_cp_cod_disp_v&quot;;\n             } &quot;r_grp_vcode&quot;;\n        } &quot;r_list_code_v&quot;;\n        src -&gt; list.entry = create(&quot;List_Entry&quot;) as entry then {\n            src -&gt; entry.item = reference(group) &quot;r_list_group_entry&quot;;\n        } &quot;r_list_entry&quot;;\n    } &quot;r_list_bundle_entry&quot;;\n}\n\ngroup ExtractTask(source src : QuestionnaireResponse, source location : Location, target bundle : Bundle){\n    src -&gt; bundle.entry as entry, entry.resource = create('Task') as task then {\n        src -&gt; task.id = uuid(),\n               task.identifier = create('Identifier') as iden, iden.value = 'hh_survey', iden.use = 'official',\n               task.status = 'completed',\n               task.intent = 'plan',\n               task.priority = 'routine',\n               task.description = 'Household Survey',\n               task.for = create('Reference') as ref, ref.reference = evaluate(location, type().name + '/' + $this.id.replaceMatches('/_history/.*', '')),\n               task.authoredOn = evaluate(src, now()),\n               task.requester = evaluate(src, $this.generalPractitioner.first()),\n               task.owner = evaluate(src, $this.generalPractitioner.first()) &quot;r_task_data&quot;;\n\n        src then extractPeriod(src, task) &quot;r_task_period_extr&quot;;\n\n        src -&gt; task.reasonReference = create('Reference') as ref,\n                       ref.reference = 'Questionnaire/truecover-add-location' &quot;r_task_reason_ref&quot;;\n\n        src -&gt; task.code = create('CodeableConcept') as taskCode then{\n                    src -&gt; taskCode.coding = create(&quot;Coding&quot;) as coding then {\n                        src -&gt; coding.system = &quot;https://smartregister.org/&quot; &quot;r_cp_cod_system_v&quot;;\n                        src -&gt; coding.code = 'hh_survey' &quot;r_cp_cod_value_v&quot;;\n                        src -&gt; coding.display = 'Hosehold Survey' &quot;r_cp_cod_disp_v&quot;;\n                    } &quot;r_grp_vcode&quot;;\n                    src -&gt; taskCode.text = 'Hosehold Survey' &quot;r_code_text&quot;;\n        } &quot;r_task_code_v&quot;;\n    } &quot;r_task_bundle_entry&quot;;\n}\n\ngroup extractPeriod(source subject: Location, target task: Task) {\n    subject -&gt; evaluate(task, now()) as start, evaluate(task, now()) as end then {\n        subject -&gt; create('Period') as period then {\n\n         subject -&gt; create('date') as startDate,\n                    startDate.value = evaluate(start, $this.value.substring(0,7) + '-01'),\n                    create('date') as maxMonth,\n                    maxMonth.value = evaluate(end, $this.value.substring(0,7) + '-01'),\n                    evaluate(maxMonth, $this + '365 \\'days\\''.toQuantity()) as endDate\n                    then extractPeriodTime(startDate, endDate, period) &quot;r_task_period_extr&quot;;\n\n            subject -&gt; task.executionPeriod = period &quot;r_task_per&quot;;\n        } &quot;rule_period&quot;;\n    } &quot;r_per&quot;;\n}\n\ngroup extractPeriodTime(source start: DateType, source end: DateType, target period: Period) {\n    start -&gt; period.start = create('dateTime') as dt,\n             dt.value = evaluate(start, $this.value.substring(0,10) + 'T00:00:00.00Z') &quot;r_per_start&quot;;\n\n    end -&gt; period.end = create('dateTime') as dt,\n           dt.value = evaluate(end, $this.value.substring(0,10) + 'T00:00:00.00Z') &quot;r_per_end&quot;;\n}</pre></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><pre>map &quot;http://hl7.org/fhir/StructureMap/truecover-add-location-sm&quot; = 'True Cover Add Location'\nuses &quot;http://hl7.org/fhir/StructureDefinition/QuestionnaireReponse&quot; as source\nuses &quot;http://hl7.org/fhir/StructureDefinition/Bundle&quot; as target\n\ngroup AddLocation(source src : QuestionnaireResponse, target bundle: Bundle) {\n    src -&gt; bundle.type = &quot;collection&quot; &quot;r_bundle_type&quot;;\n    src then ExtractLocation(src, bundle)&quot;r_bundle_entries&quot;;\n}\n\ngroup ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;Location&quot;) as loc then {\n    \tsrc -&gt; loc.id = uuid() &quot;r_loc_id&quot;;\n    \t// for existing locations\n        src.item as locationId where(linkId=&quot;location-id&quot; and answer.count()&gt;0 )  then {\n            src -&gt; loc.id = create(&quot;id&quot;) as location_id then {\n                  src -&gt; location_id.value = evaluate(locationId, $this.answer.value) &quot;r_set_existing_location_id&quot;;\n              } &quot;r_location_id&quot;;\n        } &quot;r_location_exists&quot;;\n\n        // for new locations\n        src.item as locationIdExists where(linkId=&quot;location-id&quot; and answer.count()&lt;1 ) then {\n            src -&gt; loc.status =  &quot;active&quot; &quot;r_loc_status&quot;;\n            src -&gt; loc.meta = create(&quot;Meta&quot;) as meta then {\n                src.item as province where(linkId=&quot;select-province&quot;) and answer.count()&gt;0 then {\n                    src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                        src -&gt; coding.code = evaluate(province, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_1_meta_code&quot;;\n                        src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_1_meta_system&quot;;\n                    } &quot;r_loc_level_1_meta_tag&quot;;\n                } &quot;r_loc_level_1_meta_exists&quot;;\n                src.item as district where(linkId=&quot;select-district&quot;) and answer.count()&gt;0 then {\n                    src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                        src -&gt; coding.code = evaluate(district, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_2_meta_code&quot;;\n                        src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_2_meta_system&quot;;\n                    } &quot;r_loc_level_2_meta_tag&quot;;\n                } &quot;r_loc_level_2_meta_exists&quot;;\n                src.item as operationalArea where(linkId=&quot;select-operational-area&quot;) and answer.count()&gt;0 then {\n                    src -&gt; meta.tag = create(&quot;Coding&quot;) as coding then {\n                        src -&gt; coding.code = evaluate(operationalArea, $this.answer.value.reference.split(&quot;/&quot;)[1]) &quot;r_loc_level_3_meta_code&quot;;\n                        src -&gt; coding.system = &quot;http://smartregister.org/CodeSystem/location-lineage&quot; &quot;r_loc_level_3_meta_system&quot;;\n                    } &quot;r_loc_level_3_meta_tag&quot;;\n                } &quot;r_loc_level_3_meta_exists&quot;;\n            } &quot;r_loc_meta&quot;;\n            src.item as locName where(linkId=&quot;house-hold-head-name&quot;) and answer.count()&gt;0 then {\n                src -&gt; loc.name = evaluate(locName, $this.answer.value) &quot;r_loc_name&quot;;\n            } &quot;r_loc_name_exists&quot;;\n\n            // Extract lat/long from dropped pin\n            src.item as locLon where(linkId=&quot;positionLongitude&quot;) and answer.count()&gt;0 then {\n                src.item as locLat where(linkId=&quot;positionLatitude&quot;) and answer.count()&gt;0 then {\n                    src -&gt; loc.position = create(&quot;Location_Position&quot;) as pos then {\n                        src -&gt; pos.longitude = evaluate(locLon, $this.answer.value)&quot;r_loc_long&quot;;\n                        src -&gt; pos.latitude = evaluate(locLat, $this.answer.value) &quot;r_loc_lat&quot;;\n                    } &quot;r_loc_pos&quot;;\n                } &quot;r_loc_lat_exists&quot;;\n            } &quot;r_loc_lon_exists&quot;;\n\n            // Extract lat/long from GPS coordinates\n           src.item as locationWidgetItem where(linkId='location-widget') then {\n               src -&gt; loc.position = create(&quot;Location_Position&quot;) as position then {\n                    locationWidgetItem.item as itemLatitude where(linkId='latitude') then {\n                       src -&gt; position.latitude = evaluate(src, itemLatitude.answer.value) &quot;r-position-latitude&quot;;\n                   } &quot;r-latitude-item&quot;;\n                   locationWidgetItem.item as itemLongitude where(linkId='longitude') then {\n                       src -&gt; position.longitude = evaluate(src, itemLongitude.answer.value) &quot;r-position-longitude&quot;;\n                   } &quot;r-longitude-item&quot;;\n               } &quot;r_position_data&quot;;\n           } &quot;r_loc_widget&quot;;\n\n            src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n                src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = &quot;bu&quot; &quot;r_building_loc_type_code&quot;;\n                    src -&gt; coding.display = &quot;Building&quot; &quot;r_building_loc_type_display&quot;;\n                    src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_building_loc_type_system&quot;;\n                    } &quot;r_building_loc_type_coding&quot;;\n            } &quot;r_building_loc_type&quot;;\n\n            src -&gt; loc.type = create(&quot;CodeableConcept&quot;) as concept then {\n                src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = &quot;5&quot; &quot;r_admin_level_loc_type_code&quot;;\n                    src -&gt; coding.display = &quot;Level 5&quot; &quot;r_admin_level_loc_type_display&quot;;\n                    src -&gt; coding.system = &quot;https://smartregister.org/codes/administrative-level&quot; &quot;r_admin_level_loc_type_system&quot;;\n                } &quot;r_admin_level_loc_type_coding&quot;;\n            } &quot;r_admin_level_loc_type_concept&quot;;\n\n            src -&gt; loc.physicalType = create(&quot;CodeableConcept&quot;) as concept then {\n                 src -&gt; concept.coding = create(&quot;Coding&quot;) as coding then {\n                    src -&gt; coding.code = &quot;bu&quot; &quot;r_loc_type_code&quot;;\n                    src -&gt; coding.display = &quot;Building&quot; &quot;r_loc_type_display&quot;;\n                    src -&gt; coding.system = &quot;http://terminology.hl7.org/CodeSystem/location-physical-type&quot; &quot;r_loc_type_system&quot;;\n                } &quot;r_loc_type_coding&quot;;\n            } &quot;r_loc_type_concept&quot;;\n\n            src.item as parentLoc where(linkId=&quot;select-operational-area&quot;) and answer.count()&gt;0 then {\n                src -&gt; loc.partOf = create(&quot;Reference&quot;) as ref then {\n                    src -&gt; ref.reference = evaluate(parentLoc, $this.answer.value.reference) &quot;r_loc_part_of&quot;;\n                    src -&gt; ref.display = evaluate(parentLoc, $this.answer.value.display)  &quot;r_loc_part_of_display&quot;;\n                } &quot;r_loc_part_of_ref&quot;;\n            } &quot;r_parent_location&quot;;\n        } &quot;r_location_not_exists&quot;;\n\n        src then ExtractGroup(src, loc ,bundle) &quot;r_extract_group&quot;;\n    } &quot;r_loc&quot;;\n}\n\ngroup ExtractGroup(source src : QuestionnaireResponse, source location : Location, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;Group&quot;) as group then {\n       src -&gt; group.id = uuid() &quot;rule_group_id_value&quot;;\n       src -&gt; group.name = evaluate(src, $this.item.where(linkId = 'house-hold-head-name').answer.value) &quot;rule_group_name&quot;;\n\n       src -&gt; group.identifier = create('Identifier') as groupIdentifier then {\n          src -&gt; groupIdentifier.value = uuid() &quot;rule_group_identifier_value&quot;;\n          src -&gt; groupIdentifier.use = &quot;secondary&quot; &quot;rule_group_identifier_use&quot;;\n          src -&gt; groupIdentifier.period = create('Period') as period, period.start = evaluate(src, $this.authored) &quot;rule_group_identifier_period&quot;;\n       } &quot;rule_group_identifier&quot;;\n\n       src -&gt; group.active = true &quot;r_grp_status_data&quot;;\n\n       src -&gt; group.characteristic = create('Group_Characteristic') as includeFamily then {\n           src -&gt; includeFamily.exclude = false &quot;rule_exclude_group_false&quot;;\n       } &quot;rule_group_char&quot;;\n\n       src -&gt; group.characteristic = create('Group_Characteristic') as familyCharacteristic then {\n           src -&gt; familyCharacteristic.code = create('CodeableConcept') as familyCharacteristicCode then{\n               src -&gt; familyCharacteristicCode.coding = c(&quot;https://smartregister.org/&quot;, &quot;active&quot;) as coding then {\n               src -&gt; coding.display = 'Active' &quot;r_cp_cod_disp_v&quot;;\n               } &quot;r_grp_vcode&quot;;\n           } &quot;rule_group_char_code&quot;;\n       } &quot;rule_group_char&quot;;\n\n       src -&gt; group.type = 'person' &quot;r_grp_type_data&quot;;\n       src -&gt; group.actual = true &quot;r_grp_actual_data&quot;;\n       src -&gt; group.code = create('CodeableConcept') as concept then ExtractFamilyCode(src, concept) &quot;r_grp_code_data&quot;;\n\n        // Add location characteristic\n       src -&gt; group.characteristic = create ('Group_Characteristic') as groupCharacteristic then {\n            src -&gt; groupCharacteristic.code = create('CodeableConcept') as locationCode then{\n                src -&gt; locationCode.coding = c(&quot;https://smartregister.org/&quot;, &quot;hh_location&quot;) as coding then {\n                    src -&gt; coding.display = 'Household location' &quot;r_cp_cod_disp_v&quot;;\n                } &quot;r_grp_vcode&quot;;\n            } &quot;r_cp_cc_coding_v&quot;;\n\n            src -&gt; groupCharacteristic.value = create('Reference') as ref, ref.reference = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) &quot;r_group_char_v&quot;;\n            src -&gt; groupCharacteristic.exclude = false &quot;r_group_char_exclude_v&quot;;\n       } &quot;r_group_char_v&quot;;\n\n       src then ExtractList(src, location, group, bundle) &quot;r_extract_list&quot;;\n       src then  ExtractTask(src, location, bundle) &quot;r_extract_task&quot;;\n    } &quot;r_group_bundle_entry&quot;;\n}\n\ngroup ExtractFamilyCode(source src : Group, target concept: CodeableConcept) {\n    src -&gt; concept.coding = c(&quot;https://www.snomed.org&quot;, &quot;35359004&quot;) as coding then {\n        src -&gt; coding.display = 'Family' &quot;r_cp_cod_disp&quot;;\n\n    } &quot;r_cp_cc_cod&quot;;\n}\n\ngroup ExtractList(source src : QuestionnaireResponse, source location : Location, source group : Group, target bundle : Bundle) {\n    src -&gt; bundle.entry as entry, entry.resource = create(&quot;List&quot;) as list then {\n        src -&gt; list.id = uuid() &quot;r_list_id&quot;;\n        src -&gt; list.status = 'current' &quot;r_list_status&quot;;\n        src -&gt; list.title = evaluate(location,  $this.name + ' related resources list') &quot;r_list_title&quot;;\n        src -&gt; list.subject = reference(location) &quot;r_list-subject&quot;;\n        src -&gt; list.code = create('CodeableConcept') as listCode then{\n             src -&gt; listCode.coding = create(&quot;Coding&quot;) as coding then {\n                 src -&gt; coding.system = &quot;https://smartregister.org/&quot; &quot;r_cp_cod_system_v&quot;;\n                 src -&gt; coding.code = 'related_resource_link' &quot;r_cp_cod_value_v&quot;;\n                 src -&gt; coding.display = 'Related resources list' &quot;r_cp_cod_disp_v&quot;;\n             } &quot;r_grp_vcode&quot;;\n        } &quot;r_list_code_v&quot;;\n        src -&gt; list.entry = create(&quot;List_Entry&quot;) as entry then {\n            src -&gt; entry.item = reference(group) &quot;r_list_group_entry&quot;;\n        } &quot;r_list_entry&quot;;\n    } &quot;r_list_bundle_entry&quot;;\n}\n\ngroup ExtractTask(source src : QuestionnaireResponse, source location : Location, target bundle : Bundle){\n    src -&gt; bundle.entry as entry, entry.resource = create('Task') as task then {\n        src -&gt; task.id = uuid(),\n               task.identifier = create('Identifier') as iden, iden.value = 'hh_survey', iden.use = 'official',\n               task.status = 'completed',\n               task.intent = 'plan',\n               task.priority = 'routine',\n               task.description = 'Household Survey',\n               task.for = create('Reference') as ref, ref.reference = evaluate(location, type().name + '/' + $this.id.replaceMatches('/_history/.*', '')),\n               task.authoredOn = evaluate(src, now()),\n               task.requester = evaluate(src, $this.generalPractitioner.first()),\n               task.owner = evaluate(src, $this.generalPractitioner.first()) &quot;r_task_data&quot;;\n\n        src then extractPeriod(src, task) &quot;r_task_period_extr&quot;;\n\n        src -&gt; task.reasonReference = create('Reference') as ref,\n                       ref.reference = 'Questionnaire/truecover-add-location' &quot;r_task_reason_ref&quot;;\n\n        src -&gt; task.code = create('CodeableConcept') as taskCode then{\n                    src -&gt; taskCode.coding = create(&quot;Coding&quot;) as coding then {\n                        src -&gt; coding.system = &quot;https://smartregister.org/&quot; &quot;r_cp_cod_system_v&quot;;\n                        src -&gt; coding.code = 'hh_survey' &quot;r_cp_cod_value_v&quot;;\n                        src -&gt; coding.display = 'Hosehold Survey' &quot;r_cp_cod_disp_v&quot;;\n                    } &quot;r_grp_vcode&quot;;\n                    src -&gt; taskCode.text = 'Hosehold Survey' &quot;r_code_text&quot;;\n        } &quot;r_task_code_v&quot;;\n    } &quot;r_task_bundle_entry&quot;;\n}\n\ngroup extractPeriod(source subject: Location, target task: Task) {\n    subject -&gt; evaluate(task, now()) as start, evaluate(task, now()) as end then {\n        subject -&gt; create('Period') as period then {\n\n         subject -&gt; create('date') as startDate,\n                    startDate.value = evaluate(start, $this.value.substring(0,7) + '-01'),\n                    create('date') as maxMonth,\n                    maxMonth.value = evaluate(end, $this.value.substring(0,7) + '-01'),\n                    evaluate(maxMonth, $this + '365 \\'days\\''.toQuantity()) as endDate\n                    then extractPeriodTime(startDate, endDate, period) &quot;r_task_period_extr&quot;;\n\n            subject -&gt; task.executionPeriod = period &quot;r_task_per&quot;;\n        } &quot;rule_period&quot;;\n    } &quot;r_per&quot;;\n}\n\ngroup extractPeriodTime(source start: DateType, source end: DateType, target period: Period) {\n    start -&gt; period.start = create('dateTime') as dt,\n             dt.value = evaluate(start, $this.value.substring(0,10) + 'T00:00:00.00Z') &quot;r_per_start&quot;;\n\n    end -&gt; period.end = create('dateTime') as dt,\n           dt.value = evaluate(end, $this.value.substring(0,10) + 'T00:00:00.00Z') &quot;r_per_end&quot;;\n}</pre></div>"
   },
   "url": "http://hl7.org/fhir/StructureMap/truecover-add-location-sm",
   "name": "True Cover Add Location",
@@ -135,309 +135,18 @@
               ]
             },
             {
-              "name": "r_loc_status",
-              "source": [
-                {
-                  "context": "src"
-                }
-              ],
-              "target": [
-                {
-                  "context": "loc",
-                  "contextType": "variable",
-                  "element": "status",
-                  "transform": "copy",
-                  "parameter": [
-                    {
-                      "valueString": "active"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "r_loc_meta",
-              "source": [
-                {
-                  "context": "src"
-                }
-              ],
-              "target": [
-                {
-                  "context": "loc",
-                  "contextType": "variable",
-                  "element": "meta",
-                  "variable": "meta",
-                  "transform": "create",
-                  "parameter": [
-                    {
-                      "valueString": "Meta"
-                    }
-                  ]
-                }
-              ],
-              "rule": [
-                {
-                  "name": "r_loc_level_1_meta_exists",
-                  "source": [
-                    {
-                      "context": "src",
-                      "element": "item",
-                      "variable": "province",
-                      "condition": "(linkId = 'select-province') and (answer.count() > 0)"
-                    }
-                  ],
-                  "rule": [
-                    {
-                      "name": "r_loc_level_1_meta_tag",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "meta",
-                          "contextType": "variable",
-                          "element": "tag",
-                          "variable": "coding",
-                          "transform": "create",
-                          "parameter": [
-                            {
-                              "valueString": "Coding"
-                            }
-                          ]
-                        }
-                      ],
-                      "rule": [
-                        {
-                          "name": "r_loc_level_1_meta_code",
-                          "source": [
-                            {
-                              "context": "src"
-                            }
-                          ],
-                          "target": [
-                            {
-                              "context": "coding",
-                              "contextType": "variable",
-                              "element": "code",
-                              "transform": "evaluate",
-                              "parameter": [
-                                {
-                                  "valueId": "province"
-                                },
-                                {
-                                  "valueString": "$this.answer.value.reference.split('/')[1]"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "name": "r_loc_level_1_meta_system",
-                          "source": [
-                            {
-                              "context": "src"
-                            }
-                          ],
-                          "target": [
-                            {
-                              "context": "coding",
-                              "contextType": "variable",
-                              "element": "system",
-                              "transform": "copy",
-                              "parameter": [
-                                {
-                                  "valueString": "http://smartregister.org/CodeSystem/location-lineage"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "name": "r_loc_level_2_meta_exists",
-                  "source": [
-                    {
-                      "context": "src",
-                      "element": "item",
-                      "variable": "district",
-                      "condition": "(linkId = 'select-district') and (answer.count() > 0)"
-                    }
-                  ],
-                  "rule": [
-                    {
-                      "name": "r_loc_level_2_meta_tag",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "meta",
-                          "contextType": "variable",
-                          "element": "tag",
-                          "variable": "coding",
-                          "transform": "create",
-                          "parameter": [
-                            {
-                              "valueString": "Coding"
-                            }
-                          ]
-                        }
-                      ],
-                      "rule": [
-                        {
-                          "name": "r_loc_level_2_meta_code",
-                          "source": [
-                            {
-                              "context": "src"
-                            }
-                          ],
-                          "target": [
-                            {
-                              "context": "coding",
-                              "contextType": "variable",
-                              "element": "code",
-                              "transform": "evaluate",
-                              "parameter": [
-                                {
-                                  "valueId": "district"
-                                },
-                                {
-                                  "valueString": "$this.answer.value.reference.split('/')[1]"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "name": "r_loc_level_2_meta_system",
-                          "source": [
-                            {
-                              "context": "src"
-                            }
-                          ],
-                          "target": [
-                            {
-                              "context": "coding",
-                              "contextType": "variable",
-                              "element": "system",
-                              "transform": "copy",
-                              "parameter": [
-                                {
-                                  "valueString": "http://smartregister.org/CodeSystem/location-lineage"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "name": "r_loc_level_3_meta_exists",
-                  "source": [
-                    {
-                      "context": "src",
-                      "element": "item",
-                      "variable": "operationalArea",
-                      "condition": "(linkId = 'select-operational-area') and (answer.count() > 0)"
-                    }
-                  ],
-                  "rule": [
-                    {
-                      "name": "r_loc_level_3_meta_tag",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "meta",
-                          "contextType": "variable",
-                          "element": "tag",
-                          "variable": "coding",
-                          "transform": "create",
-                          "parameter": [
-                            {
-                              "valueString": "Coding"
-                            }
-                          ]
-                        }
-                      ],
-                      "rule": [
-                        {
-                          "name": "r_loc_level_3_meta_code",
-                          "source": [
-                            {
-                              "context": "src"
-                            }
-                          ],
-                          "target": [
-                            {
-                              "context": "coding",
-                              "contextType": "variable",
-                              "element": "code",
-                              "transform": "evaluate",
-                              "parameter": [
-                                {
-                                  "valueId": "operationalArea"
-                                },
-                                {
-                                  "valueString": "$this.answer.value.reference.split('/')[1]"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "name": "r_loc_level_3_meta_system",
-                          "source": [
-                            {
-                              "context": "src"
-                            }
-                          ],
-                          "target": [
-                            {
-                              "context": "coding",
-                              "contextType": "variable",
-                              "element": "system",
-                              "transform": "copy",
-                              "parameter": [
-                                {
-                                  "valueString": "http://smartregister.org/CodeSystem/location-lineage"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "r_loc_name_exists",
+              "name": "r_location_exists",
               "source": [
                 {
                   "context": "src",
                   "element": "item",
-                  "variable": "locName",
-                  "condition": "(linkId = 'house-hold-head-name') and (answer.count() > 0)"
+                  "variable": "locationId",
+                  "condition": "((linkId = 'location-id') and (answer.count() > 0))"
                 }
               ],
               "rule": [
                 {
-                  "name": "r_loc_name",
+                  "name": "r_location_id",
                   "source": [
                     {
                       "context": "src"
@@ -447,14 +156,38 @@
                     {
                       "context": "loc",
                       "contextType": "variable",
-                      "element": "name",
-                      "transform": "evaluate",
+                      "element": "id",
+                      "variable": "location_id",
+                      "transform": "create",
                       "parameter": [
                         {
-                          "valueId": "locName"
-                        },
+                          "valueString": "id"
+                        }
+                      ]
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_set_existing_location_id",
+                      "source": [
                         {
-                          "valueString": "$this.answer.value"
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "location_id",
+                          "contextType": "variable",
+                          "element": "value",
+                          "transform": "evaluate",
+                          "parameter": [
+                            {
+                              "valueId": "locationId"
+                            },
+                            {
+                              "valueString": "$this.answer.value"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -463,29 +196,455 @@
               ]
             },
             {
-              "name": "r_loc_lon_exists",
+              "name": "r_location_not_exists",
               "source": [
                 {
                   "context": "src",
                   "element": "item",
-                  "variable": "locLon",
-                  "condition": "(linkId = 'positionLongitude') and (answer.count() > 0)"
+                  "variable": "locationIdExists",
+                  "condition": "((linkId = 'location-id') and (answer.count() < 1))"
                 }
               ],
               "rule": [
                 {
-                  "name": "r_loc_lat_exists",
+                  "name": "r_loc_status",
                   "source": [
                     {
-                      "context": "src",
-                      "element": "item",
-                      "variable": "locLat",
-                      "condition": "(linkId = 'positionLatitude') and (answer.count() > 0)"
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "loc",
+                      "contextType": "variable",
+                      "element": "status",
+                      "transform": "copy",
+                      "parameter": [
+                        {
+                          "valueString": "active"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "r_loc_meta",
+                  "source": [
+                    {
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "loc",
+                      "contextType": "variable",
+                      "element": "meta",
+                      "variable": "meta",
+                      "transform": "create",
+                      "parameter": [
+                        {
+                          "valueString": "Meta"
+                        }
+                      ]
                     }
                   ],
                   "rule": [
                     {
-                      "name": "r_loc_pos",
+                      "name": "r_loc_level_1_meta_exists",
+                      "source": [
+                        {
+                          "context": "src",
+                          "element": "item",
+                          "variable": "province",
+                          "condition": "(linkId = 'select-province') and (answer.count() > 0)"
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_loc_level_1_meta_tag",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "meta",
+                              "contextType": "variable",
+                              "element": "tag",
+                              "variable": "coding",
+                              "transform": "create",
+                              "parameter": [
+                                {
+                                  "valueString": "Coding"
+                                }
+                              ]
+                            }
+                          ],
+                          "rule": [
+                            {
+                              "name": "r_loc_level_1_meta_code",
+                              "source": [
+                                {
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
+                                {
+                                  "context": "coding",
+                                  "contextType": "variable",
+                                  "element": "code",
+                                  "transform": "evaluate",
+                                  "parameter": [
+                                    {
+                                      "valueId": "province"
+                                    },
+                                    {
+                                      "valueString": "$this.answer.value.reference.split('/')[1]"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "r_loc_level_1_meta_system",
+                              "source": [
+                                {
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
+                                {
+                                  "context": "coding",
+                                  "contextType": "variable",
+                                  "element": "system",
+                                  "transform": "copy",
+                                  "parameter": [
+                                    {
+                                      "valueString": "http://smartregister.org/CodeSystem/location-lineage"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "r_loc_level_2_meta_exists",
+                      "source": [
+                        {
+                          "context": "src",
+                          "element": "item",
+                          "variable": "district",
+                          "condition": "(linkId = 'select-district') and (answer.count() > 0)"
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_loc_level_2_meta_tag",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "meta",
+                              "contextType": "variable",
+                              "element": "tag",
+                              "variable": "coding",
+                              "transform": "create",
+                              "parameter": [
+                                {
+                                  "valueString": "Coding"
+                                }
+                              ]
+                            }
+                          ],
+                          "rule": [
+                            {
+                              "name": "r_loc_level_2_meta_code",
+                              "source": [
+                                {
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
+                                {
+                                  "context": "coding",
+                                  "contextType": "variable",
+                                  "element": "code",
+                                  "transform": "evaluate",
+                                  "parameter": [
+                                    {
+                                      "valueId": "district"
+                                    },
+                                    {
+                                      "valueString": "$this.answer.value.reference.split('/')[1]"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "r_loc_level_2_meta_system",
+                              "source": [
+                                {
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
+                                {
+                                  "context": "coding",
+                                  "contextType": "variable",
+                                  "element": "system",
+                                  "transform": "copy",
+                                  "parameter": [
+                                    {
+                                      "valueString": "http://smartregister.org/CodeSystem/location-lineage"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "r_loc_level_3_meta_exists",
+                      "source": [
+                        {
+                          "context": "src",
+                          "element": "item",
+                          "variable": "operationalArea",
+                          "condition": "(linkId = 'select-operational-area') and (answer.count() > 0)"
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_loc_level_3_meta_tag",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "meta",
+                              "contextType": "variable",
+                              "element": "tag",
+                              "variable": "coding",
+                              "transform": "create",
+                              "parameter": [
+                                {
+                                  "valueString": "Coding"
+                                }
+                              ]
+                            }
+                          ],
+                          "rule": [
+                            {
+                              "name": "r_loc_level_3_meta_code",
+                              "source": [
+                                {
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
+                                {
+                                  "context": "coding",
+                                  "contextType": "variable",
+                                  "element": "code",
+                                  "transform": "evaluate",
+                                  "parameter": [
+                                    {
+                                      "valueId": "operationalArea"
+                                    },
+                                    {
+                                      "valueString": "$this.answer.value.reference.split('/')[1]"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "r_loc_level_3_meta_system",
+                              "source": [
+                                {
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
+                                {
+                                  "context": "coding",
+                                  "contextType": "variable",
+                                  "element": "system",
+                                  "transform": "copy",
+                                  "parameter": [
+                                    {
+                                      "valueString": "http://smartregister.org/CodeSystem/location-lineage"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "r_loc_name_exists",
+                  "source": [
+                    {
+                      "context": "src",
+                      "element": "item",
+                      "variable": "locName",
+                      "condition": "(linkId = 'house-hold-head-name') and (answer.count() > 0)"
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_loc_name",
+                      "source": [
+                        {
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "loc",
+                          "contextType": "variable",
+                          "element": "name",
+                          "transform": "evaluate",
+                          "parameter": [
+                            {
+                              "valueId": "locName"
+                            },
+                            {
+                              "valueString": "$this.answer.value"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "r_loc_lon_exists",
+                  "source": [
+                    {
+                      "context": "src",
+                      "element": "item",
+                      "variable": "locLon",
+                      "condition": "(linkId = 'positionLongitude') and (answer.count() > 0)"
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_loc_lat_exists",
+                      "source": [
+                        {
+                          "context": "src",
+                          "element": "item",
+                          "variable": "locLat",
+                          "condition": "(linkId = 'positionLatitude') and (answer.count() > 0)"
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_loc_pos",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "loc",
+                              "contextType": "variable",
+                              "element": "position",
+                              "variable": "pos",
+                              "transform": "create",
+                              "parameter": [
+                                {
+                                  "valueString": "Location_Position"
+                                }
+                              ]
+                            }
+                          ],
+                          "rule": [
+                            {
+                              "name": "r_loc_long",
+                              "source": [
+                                {
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
+                                {
+                                  "context": "pos",
+                                  "contextType": "variable",
+                                  "element": "longitude",
+                                  "transform": "evaluate",
+                                  "parameter": [
+                                    {
+                                      "valueId": "locLon"
+                                    },
+                                    {
+                                      "valueString": "$this.answer.value"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "r_loc_lat",
+                              "source": [
+                                {
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
+                                {
+                                  "context": "pos",
+                                  "contextType": "variable",
+                                  "element": "latitude",
+                                  "transform": "evaluate",
+                                  "parameter": [
+                                    {
+                                      "valueId": "locLat"
+                                    },
+                                    {
+                                      "valueString": "$this.answer.value"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "r_loc_widget",
+                  "source": [
+                    {
+                      "context": "src",
+                      "element": "item",
+                      "variable": "locationWidgetItem",
+                      "condition": "(linkId = 'location-widget')"
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_position_data",
                       "source": [
                         {
                           "context": "src"
@@ -496,7 +655,7 @@
                           "context": "loc",
                           "contextType": "variable",
                           "element": "position",
-                          "variable": "pos",
+                          "variable": "position",
                           "transform": "create",
                           "parameter": [
                             {
@@ -507,48 +666,74 @@
                       ],
                       "rule": [
                         {
-                          "name": "r_loc_long",
+                          "name": "r-latitude-item",
                           "source": [
                             {
-                              "context": "src"
+                              "context": "locationWidgetItem",
+                              "element": "item",
+                              "variable": "itemLatitude",
+                              "condition": "(linkId = 'latitude')"
                             }
                           ],
-                          "target": [
+                          "rule": [
                             {
-                              "context": "pos",
-                              "contextType": "variable",
-                              "element": "longitude",
-                              "transform": "evaluate",
-                              "parameter": [
+                              "name": "r-position-latitude",
+                              "source": [
                                 {
-                                  "valueId": "locLon"
-                                },
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
                                 {
-                                  "valueString": "$this.answer.value"
+                                  "context": "position",
+                                  "contextType": "variable",
+                                  "element": "latitude",
+                                  "transform": "evaluate",
+                                  "parameter": [
+                                    {
+                                      "valueId": "src"
+                                    },
+                                    {
+                                      "valueString": "itemLatitude.answer.value"
+                                    }
+                                  ]
                                 }
                               ]
                             }
                           ]
                         },
                         {
-                          "name": "r_loc_lat",
+                          "name": "r-longitude-item",
                           "source": [
                             {
-                              "context": "src"
+                              "context": "locationWidgetItem",
+                              "element": "item",
+                              "variable": "itemLongitude",
+                              "condition": "(linkId = 'longitude')"
                             }
                           ],
-                          "target": [
+                          "rule": [
                             {
-                              "context": "pos",
-                              "contextType": "variable",
-                              "element": "latitude",
-                              "transform": "evaluate",
-                              "parameter": [
+                              "name": "r-position-longitude",
+                              "source": [
                                 {
-                                  "valueId": "locLat"
-                                },
+                                  "context": "src"
+                                }
+                              ],
+                              "target": [
                                 {
-                                  "valueString": "$this.answer.value"
+                                  "context": "position",
+                                  "contextType": "variable",
+                                  "element": "longitude",
+                                  "transform": "evaluate",
+                                  "parameter": [
+                                    {
+                                      "valueId": "src"
+                                    },
+                                    {
+                                      "valueString": "itemLongitude.answer.value"
+                                    }
+                                  ]
                                 }
                               ]
                             }
@@ -557,22 +742,9 @@
                       ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "name": "r_loc_widget",
-              "source": [
+                },
                 {
-                  "context": "src",
-                  "element": "item",
-                  "variable": "locationWidgetItem",
-                  "condition": "(linkId = 'location-widget')"
-                }
-              ],
-              "rule": [
-                {
-                  "name": "r_position_data",
+                  "name": "r_building_loc_type",
                   "source": [
                     {
                       "context": "src"
@@ -582,30 +754,41 @@
                     {
                       "context": "loc",
                       "contextType": "variable",
-                      "element": "position",
-                      "variable": "position",
+                      "element": "type",
+                      "variable": "concept",
                       "transform": "create",
                       "parameter": [
                         {
-                          "valueString": "Location_Position"
+                          "valueString": "CodeableConcept"
                         }
                       ]
                     }
                   ],
                   "rule": [
                     {
-                      "name": "r-latitude-item",
+                      "name": "r_building_loc_type_coding",
                       "source": [
                         {
-                          "context": "locationWidgetItem",
-                          "element": "item",
-                          "variable": "itemLatitude",
-                          "condition": "(linkId = 'latitude')"
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "concept",
+                          "contextType": "variable",
+                          "element": "coding",
+                          "variable": "coding",
+                          "transform": "create",
+                          "parameter": [
+                            {
+                              "valueString": "Coding"
+                            }
+                          ]
                         }
                       ],
                       "rule": [
                         {
-                          "name": "r-position-latitude",
+                          "name": "r_building_loc_type_code",
                           "source": [
                             {
                               "context": "src"
@@ -613,36 +796,20 @@
                           ],
                           "target": [
                             {
-                              "context": "position",
+                              "context": "coding",
                               "contextType": "variable",
-                              "element": "latitude",
-                              "transform": "evaluate",
+                              "element": "code",
+                              "transform": "copy",
                               "parameter": [
                                 {
-                                  "valueId": "src"
-                                },
-                                {
-                                  "valueString": "itemLatitude.answer.value"
+                                  "valueString": "bu"
                                 }
                               ]
                             }
                           ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "r-longitude-item",
-                      "source": [
+                        },
                         {
-                          "context": "locationWidgetItem",
-                          "element": "item",
-                          "variable": "itemLongitude",
-                          "condition": "(linkId = 'longitude')"
-                        }
-                      ],
-                      "rule": [
-                        {
-                          "name": "r-position-longitude",
+                          "name": "r_building_loc_type_display",
                           "source": [
                             {
                               "context": "src"
@@ -650,16 +817,34 @@
                           ],
                           "target": [
                             {
-                              "context": "position",
+                              "context": "coding",
                               "contextType": "variable",
-                              "element": "longitude",
-                              "transform": "evaluate",
+                              "element": "display",
+                              "transform": "copy",
                               "parameter": [
                                 {
-                                  "valueId": "src"
-                                },
+                                  "valueString": "Building"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "r_building_loc_type_system",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "system",
+                              "transform": "copy",
+                              "parameter": [
                                 {
-                                  "valueString": "itemLongitude.answer.value"
+                                  "valueString": "http://terminology.hl7.org/CodeSystem/location-physical-type"
                                 }
                               ]
                             }
@@ -668,355 +853,9 @@
                       ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "name": "r_building_loc_type",
-              "source": [
+                },
                 {
-                  "context": "src"
-                }
-              ],
-              "target": [
-                {
-                  "context": "loc",
-                  "contextType": "variable",
-                  "element": "type",
-                  "variable": "concept",
-                  "transform": "create",
-                  "parameter": [
-                    {
-                      "valueString": "CodeableConcept"
-                    }
-                  ]
-                }
-              ],
-              "rule": [
-                {
-                  "name": "r_building_loc_type_coding",
-                  "source": [
-                    {
-                      "context": "src"
-                    }
-                  ],
-                  "target": [
-                    {
-                      "context": "concept",
-                      "contextType": "variable",
-                      "element": "coding",
-                      "variable": "coding",
-                      "transform": "create",
-                      "parameter": [
-                        {
-                          "valueString": "Coding"
-                        }
-                      ]
-                    }
-                  ],
-                  "rule": [
-                    {
-                      "name": "r_building_loc_type_code",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "coding",
-                          "contextType": "variable",
-                          "element": "code",
-                          "transform": "copy",
-                          "parameter": [
-                            {
-                              "valueString": "bu"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "r_building_loc_type_display",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "coding",
-                          "contextType": "variable",
-                          "element": "display",
-                          "transform": "copy",
-                          "parameter": [
-                            {
-                              "valueString": "Building"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "r_building_loc_type_system",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "coding",
-                          "contextType": "variable",
-                          "element": "system",
-                          "transform": "copy",
-                          "parameter": [
-                            {
-                              "valueString": "http://terminology.hl7.org/CodeSystem/location-physical-type"
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "r_admin_level_loc_type_concept",
-              "source": [
-                {
-                  "context": "src"
-                }
-              ],
-              "target": [
-                {
-                  "context": "loc",
-                  "contextType": "variable",
-                  "element": "type",
-                  "variable": "concept",
-                  "transform": "create",
-                  "parameter": [
-                    {
-                      "valueString": "CodeableConcept"
-                    }
-                  ]
-                }
-              ],
-              "rule": [
-                {
-                  "name": "r_admin_level_loc_type_coding",
-                  "source": [
-                    {
-                      "context": "src"
-                    }
-                  ],
-                  "target": [
-                    {
-                      "context": "concept",
-                      "contextType": "variable",
-                      "element": "coding",
-                      "variable": "coding",
-                      "transform": "create",
-                      "parameter": [
-                        {
-                          "valueString": "Coding"
-                        }
-                      ]
-                    }
-                  ],
-                  "rule": [
-                    {
-                      "name": "r_admin_level_loc_type_code",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "coding",
-                          "contextType": "variable",
-                          "element": "code",
-                          "transform": "copy",
-                          "parameter": [
-                            {
-                              "valueString": "5"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "r_admin_level_loc_type_display",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "coding",
-                          "contextType": "variable",
-                          "element": "display",
-                          "transform": "copy",
-                          "parameter": [
-                            {
-                              "valueString": "Level 5"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "r_admin_level_loc_type_system",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "coding",
-                          "contextType": "variable",
-                          "element": "system",
-                          "transform": "copy",
-                          "parameter": [
-                            {
-                              "valueString": "https://smartregister.org/codes/administrative-level"
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "r_loc_type_concept",
-              "source": [
-                {
-                  "context": "src"
-                }
-              ],
-              "target": [
-                {
-                  "context": "loc",
-                  "contextType": "variable",
-                  "element": "physicalType",
-                  "variable": "concept",
-                  "transform": "create",
-                  "parameter": [
-                    {
-                      "valueString": "CodeableConcept"
-                    }
-                  ]
-                }
-              ],
-              "rule": [
-                {
-                  "name": "r_loc_type_coding",
-                  "source": [
-                    {
-                      "context": "src"
-                    }
-                  ],
-                  "target": [
-                    {
-                      "context": "concept",
-                      "contextType": "variable",
-                      "element": "coding",
-                      "variable": "coding",
-                      "transform": "create",
-                      "parameter": [
-                        {
-                          "valueString": "Coding"
-                        }
-                      ]
-                    }
-                  ],
-                  "rule": [
-                    {
-                      "name": "r_loc_type_code",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "coding",
-                          "contextType": "variable",
-                          "element": "code",
-                          "transform": "copy",
-                          "parameter": [
-                            {
-                              "valueString": "bu"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "r_loc_type_display",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "coding",
-                          "contextType": "variable",
-                          "element": "display",
-                          "transform": "copy",
-                          "parameter": [
-                            {
-                              "valueString": "Building"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "r_loc_type_system",
-                      "source": [
-                        {
-                          "context": "src"
-                        }
-                      ],
-                      "target": [
-                        {
-                          "context": "coding",
-                          "contextType": "variable",
-                          "element": "system",
-                          "transform": "copy",
-                          "parameter": [
-                            {
-                              "valueString": "http://terminology.hl7.org/CodeSystem/location-physical-type"
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "r_parent_location",
-              "source": [
-                {
-                  "context": "src",
-                  "element": "item",
-                  "variable": "parentLoc",
-                  "condition": "(linkId = 'select-operational-area') and (answer.count() > 0)"
-                }
-              ],
-              "rule": [
-                {
-                  "name": "r_loc_part_of_ref",
+                  "name": "r_admin_level_loc_type_concept",
                   "source": [
                     {
                       "context": "src"
@@ -1026,19 +865,19 @@
                     {
                       "context": "loc",
                       "contextType": "variable",
-                      "element": "partOf",
-                      "variable": "ref",
+                      "element": "type",
+                      "variable": "concept",
                       "transform": "create",
                       "parameter": [
                         {
-                          "valueString": "Reference"
+                          "valueString": "CodeableConcept"
                         }
                       ]
                     }
                   ],
                   "rule": [
                     {
-                      "name": "r_loc_part_of",
+                      "name": "r_admin_level_loc_type_coding",
                       "source": [
                         {
                           "context": "src"
@@ -1046,23 +885,110 @@
                       ],
                       "target": [
                         {
-                          "context": "ref",
+                          "context": "concept",
                           "contextType": "variable",
-                          "element": "reference",
-                          "transform": "evaluate",
+                          "element": "coding",
+                          "variable": "coding",
+                          "transform": "create",
                           "parameter": [
                             {
-                              "valueId": "parentLoc"
-                            },
+                              "valueString": "Coding"
+                            }
+                          ]
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_admin_level_loc_type_code",
+                          "source": [
                             {
-                              "valueString": "$this.answer.value.reference"
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "code",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "5"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "r_admin_level_loc_type_display",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "display",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "Level 5"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "r_admin_level_loc_type_system",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "system",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "https://smartregister.org/codes/administrative-level"
+                                }
+                              ]
                             }
                           ]
                         }
                       ]
-                    },
+                    }
+                  ]
+                },
+                {
+                  "name": "r_loc_type_concept",
+                  "source": [
                     {
-                      "name": "r_loc_part_of_display",
+                      "context": "src"
+                    }
+                  ],
+                  "target": [
+                    {
+                      "context": "loc",
+                      "contextType": "variable",
+                      "element": "physicalType",
+                      "variable": "concept",
+                      "transform": "create",
+                      "parameter": [
+                        {
+                          "valueString": "CodeableConcept"
+                        }
+                      ]
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_loc_type_coding",
                       "source": [
                         {
                           "context": "src"
@@ -1070,16 +996,164 @@
                       ],
                       "target": [
                         {
-                          "context": "ref",
+                          "context": "concept",
                           "contextType": "variable",
-                          "element": "display",
-                          "transform": "evaluate",
+                          "element": "coding",
+                          "variable": "coding",
+                          "transform": "create",
                           "parameter": [
                             {
-                              "valueId": "parentLoc"
-                            },
+                              "valueString": "Coding"
+                            }
+                          ]
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_loc_type_code",
+                          "source": [
                             {
-                              "valueString": "$this.answer.value.display"
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "code",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "bu"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "r_loc_type_display",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "display",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "Building"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "r_loc_type_system",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "coding",
+                              "contextType": "variable",
+                              "element": "system",
+                              "transform": "copy",
+                              "parameter": [
+                                {
+                                  "valueString": "http://terminology.hl7.org/CodeSystem/location-physical-type"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "r_parent_location",
+                  "source": [
+                    {
+                      "context": "src",
+                      "element": "item",
+                      "variable": "parentLoc",
+                      "condition": "(linkId = 'select-operational-area') and (answer.count() > 0)"
+                    }
+                  ],
+                  "rule": [
+                    {
+                      "name": "r_loc_part_of_ref",
+                      "source": [
+                        {
+                          "context": "src"
+                        }
+                      ],
+                      "target": [
+                        {
+                          "context": "loc",
+                          "contextType": "variable",
+                          "element": "partOf",
+                          "variable": "ref",
+                          "transform": "create",
+                          "parameter": [
+                            {
+                              "valueString": "Reference"
+                            }
+                          ]
+                        }
+                      ],
+                      "rule": [
+                        {
+                          "name": "r_loc_part_of",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "ref",
+                              "contextType": "variable",
+                              "element": "reference",
+                              "transform": "evaluate",
+                              "parameter": [
+                                {
+                                  "valueId": "parentLoc"
+                                },
+                                {
+                                  "valueString": "$this.answer.value.reference"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "r_loc_part_of_display",
+                          "source": [
+                            {
+                              "context": "src"
+                            }
+                          ],
+                          "target": [
+                            {
+                              "context": "ref",
+                              "contextType": "variable",
+                              "element": "display",
+                              "transform": "evaluate",
+                              "parameter": [
+                                {
+                                  "valueId": "parentLoc"
+                                },
+                                {
+                                  "valueString": "$this.answer.value.display"
+                                }
+                              ]
                             }
                           ]
                         }
