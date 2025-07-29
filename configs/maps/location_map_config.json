@@ -159,6 +159,22 @@
   "servicePointConfig": {
     "rules": [
       {
+        "name": "familyRegistered",
+        "condition": "true",
+        "priority": 1,
+        "actions": [
+          "data.put('familyRegistered', (size(relatedGroups) > 0))"
+        ]
+      },
+      {
+        "name": "registerFamily",
+        "condition": "true",
+        "priority": 1,
+        "actions": [
+          "data.put('registerFamily', (size(relatedGroups) < 1))"
+        ]
+      },
+      {
         "name": "familyLogicalId",
         "condition": "true",
         "priority": 1,
@@ -185,6 +201,20 @@
         "condition": "true",
         "actions": [
           "data.put('status', fhirPath.extractValue(Location, \"Location.status\"))"
+        ]
+      },
+      {
+        "name": "positionLongitude",
+        "condition": "true",
+        "actions": [
+          "data.put('positionLongitude', fhirPath.extractValue(Location, \"Location.position.longitude\"))"
+        ]
+      },
+      {
+        "name": "positionLatitude",
+        "condition": "true",
+        "actions": [
+          "data.put('positionLatitude', fhirPath.extractValue(Location, \"Location.position.latitude\"))"
         ]
       },
       {
@@ -215,7 +245,12 @@
       "visitStatus": "@{visitStatus}",
       "name": "@{name}",
       "status": "@{status}",
-      "familyLogicalId": "@{familyLogicalId}"
+      "familyLogicalId": "@{familyLogicalId}",
+      "locationId": "@{locationId}",
+      "positionLongitude": "@{positionLongitude}",
+      "positionLatitude": "@{positionLatitude}",
+      "familyRegistered": "@{familyRegistered}",
+      "registerFamily": "@{registerFamily}"
     }
   },
   "topScreenSection": {
@@ -346,7 +381,8 @@
                           "type": "local",
                           "reference": "@{ic_home}"
                         },
-                        "clickable": true,
+                        "clickable": "@{familyRegistered}",
+                        "visible": "@{familyRegistered}",
                         "fillMaxWidth": false,
                         "actions": [
                           {
@@ -361,6 +397,58 @@
                               }
                             ]
 
+                          }
+                        ]
+                      },
+                      {
+                        "viewType": "SPACER",
+                        "height": 8
+                      },
+                      {
+                        "viewType": "BUTTON",
+                        "smallSized": true,
+                        "text": "Household Survey",
+                        "status": "DUE",
+                        "alignment": "CENTER",
+                        "startIcon": {
+                          "type": "local",
+                          "reference": "@{ic_home}"
+                        },
+                        "clickable": "@{registerFamily}",
+                        "visible": "@{registerFamily}",
+                        "fillMaxWidth": false,
+                        "actions": [
+                          {
+                            "trigger": "ON_CLICK",
+                            "workflow": "LAUNCH_QUESTIONNAIRE",
+                            "questionnaire": {
+                              "id": "truecover-add-location",
+                              "title": "Add Household",
+                              "saveButtonText": "Save",
+                              "extraParams": [
+                                {
+                                  "paramType": "PREPOPULATE",
+                                  "linkId": "location-id",
+                                  "dataType": "STRING",
+                                  "key": "locationId",
+                                  "value": "@{locationId}"
+                                },
+                                {
+                                  "paramType": "PREPOPULATE",
+                                  "linkId": "positionLongitude",
+                                  "dataType": "STRING",
+                                  "key": "positionLongitude",
+                                  "value": "@{positionLongitude}"
+                                },
+                                {
+                                  "paramType": "PREPOPULATE",
+                                  "linkId": "positionLatitude",
+                                  "dataType": "STRING",
+                                  "key": "positionLatitude",
+                                  "value": "@{positionLatitude}"
+                                }
+                              ]
+                            }
                           }
                         ]
                       }
