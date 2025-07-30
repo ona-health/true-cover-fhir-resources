@@ -299,16 +299,6 @@
             }
           ]
         }
-      ],
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
-            "code": "yes"
-          }
-        }
       ]
     },
     {
@@ -349,16 +339,6 @@
               "valueBoolean": true
             }
           ]
-        }
-      ],
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
-            "code": "yes"
-          }
         }
       ]
     },
@@ -412,17 +392,7 @@
         ]
       },
       "type": "reference",
-      "required": true,
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
-            "code": "yes"
-          }
-        }
-      ]
+      "required": true
     },
     {
       "extension": [
@@ -475,17 +445,7 @@
         ]
       },
       "type": "reference",
-      "required": true,
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
-            "code": "yes"
-          }
-        }
-      ]
+      "required": true
     },
     {
       "extension": [
@@ -497,17 +457,7 @@
       "linkId": "positionLongitude",
       "type": "string",
       "readOnly": true,
-      "required": false,
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
-            "code": "yes"
-          }
-        }
-      ]
+      "required": false
     },
     {
       "extension": [
@@ -519,17 +469,7 @@
       "linkId": "positionLatitude",
       "type": "string",
       "readOnly": true,
-      "required": false,
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
-            "code": "yes"
-          }
-        }
-      ]
+      "required": false
     }
   ]
 }

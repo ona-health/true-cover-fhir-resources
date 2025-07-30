@@ -245,16 +245,6 @@
             }
           ]
         }
-      ],
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:b544556f-af7a-435e-8ed7-238628b89ed2",
-            "code": "yes"
-          }
-        }
       ]
     },
     {
@@ -307,17 +297,7 @@
         ]
       },
       "type": "reference",
-      "required": true,
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:b544556f-af7a-435e-8ed7-238628b89ed2",
-            "code": "yes"
-          }
-        }
-      ]
+      "required": true
     },
     {
       "extension": [
@@ -369,17 +349,7 @@
         ]
       },
       "type": "reference",
-      "required": true,
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:b544556f-af7a-435e-8ed7-238628b89ed2",
-            "code": "yes"
-          }
-        }
-      ]
+      "required": true
     },
     {
       "extension": [
@@ -392,17 +362,7 @@
       "type": "string",
       "text": "Longitude",
       "readOnly": true,
-      "required": false,
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:b544556f-af7a-435e-8ed7-238628b89ed2",
-            "code": "yes"
-          }
-        }
-      ]
+      "required": false
     },
     {
       "extension": [
@@ -415,17 +375,7 @@
       "text": "Latitude",
       "type": "string",
       "readOnly": true,
-      "required": false,
-      "enableWhen": [
-        {
-          "question": "was-survey-done",
-          "operator": "=",
-          "answerCoding": {
-            "system": "urn:uuid:b544556f-af7a-435e-8ed7-238628b89ed2",
-            "code": "yes"
-          }
-        }
-      ]
+      "required": false
     },
     {
       "extension": [

@@ -71,12 +71,6 @@
     },
     "relatedResources": [
       {
-        "id": "relatedParentLocations",
-        "resource": "Location",
-        "searchParameter": "partof",
-        "isRevInclude": false
-      },
-      {
         "id": "relatedLists",
         "resource": "List",
         "searchParameter": "subject",
@@ -95,6 +89,19 @@
         "resource": "Task",
         "searchParameter": "subject",
         "isRevInclude": true
+      },
+      {
+        "id": "relatedQuestionnaireResponses",
+        "resource": "QuestionnaireResponse",
+        "searchParameter": "subject",
+        "isRevInclude": true,
+        "sortConfigs": [
+          {
+            "paramName": "_lastUpdated",
+            "dataType": "DATE",
+            "order": "DESCENDING"
+          }
+        ]
       }
     ]
   },
@@ -225,11 +232,19 @@
         ]
       },
       {
-        "name": "mostRecentHHSurveyTaskStatus",
+        "name": "mostRecentHHSurveyQRExists",
         "condition": "true",
         "priority": 1,
         "actions": [
-          "data.put('mostRecentHHSurveyTaskStatus', (size(relatedTasks) > 0) ?  service.generateTaskServiceStatus(relatedTasks.get(0)) : '')"
+          "data.put('mostRecentHHSurveyQRExists', (size(relatedQuestionnaireResponses) > 0) ? 'true'  : 'false')"
+        ]
+      },
+      {
+        "name": "mostRecentHHSurveyQRSurveyDone",
+        "condition": "true",
+        "priority": 1,
+        "actions": [
+          "data.put('mostRecentHHSurveyQRSurveyDone', (size(relatedQuestionnaireResponses) > 0) ? fhirPath.extractValue(relatedQuestionnaireResponses.get(0), \"QuestionnaireResponse.item.where(linkId = 'was-survey-done' and answer.count()>0).answer.value.code\")  : '')"
         ]
       },
       {
@@ -237,7 +252,7 @@
         "condition": "true",
         "priority": 2,
         "actions": [
-          "data.put('visitStatus', data.get('mostRecentHHSurveyTaskStatus')== 'COMPLETED' ? 'finished' : 'not_started')"
+          "data.put('visitStatus', data.get('mostRecentHHSurveyQRExists')== 'true' ? ( (data.get('mostRecentHHSurveyQRSurveyDone') == 'yes') ? 'finished' : 'rejected') : 'not_started')"
         ]
       }
     ],
