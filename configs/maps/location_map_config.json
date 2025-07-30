@@ -240,11 +240,11 @@
         ]
       },
       {
-        "name": "mostRecentHHSurveyQRSurveyDone",
+        "name": "mostRecentHHSurveyQRStatus",
         "condition": "true",
         "priority": 1,
         "actions": [
-          "data.put('mostRecentHHSurveyQRSurveyDone', (size(relatedQuestionnaireResponses) > 0) ? fhirPath.extractValue(relatedQuestionnaireResponses.get(0), \"QuestionnaireResponse.item.where(linkId = 'was-survey-done' and answer.count()>0).answer.value.code\")  : '')"
+          "data.put('mostRecentHHSurveyQRStatus', (size(relatedQuestionnaireResponses) > 0) ? fhirPath.extractValue(relatedQuestionnaireResponses.get(0), \"QuestionnaireResponse.item.where(linkId = 'was-survey-done' and answer.count()>0).answer.value.code\")  : '')"
         ]
       },
       {
@@ -252,7 +252,7 @@
         "condition": "true",
         "priority": 2,
         "actions": [
-          "data.put('visitStatus', data.get('mostRecentHHSurveyQRExists')== 'true' ? ( (data.get('mostRecentHHSurveyQRSurveyDone') == 'yes') ? 'finished' : 'rejected') : 'not_started')"
+          "data.put('visitStatus', data.get('mostRecentHHSurveyQRExists')== 'true' ? ( (data.get('mostRecentHHSurveyQRStatus') == 'yes') ? 'finished' : 'rejected') : 'not_started')"
         ]
       }
     ],
