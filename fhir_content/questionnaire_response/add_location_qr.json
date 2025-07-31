@@ -12,9 +12,30 @@
       "entry": [
         {
           "deleted": false,
-          "date": "2025-07-11T08:39:36+03:00",
+          "date": "2025-07-26T11:36:48+03:00",
           "item": {
-            "reference": "Location/03e1125d-4ec4-4749-b525-d2afdc910043"
+            "reference": "Location/778b0f98-1bf9-4b3e-8a2b-eeefc3e3905e"
+          }
+        },
+        {
+          "deleted": false,
+          "date": "2025-07-26T11:36:48+03:00",
+          "item": {
+            "reference": "Group/83412398-dbc5-4afa-83b5-f744e7708055"
+          }
+        },
+        {
+          "deleted": false,
+          "date": "2025-07-26T11:36:48+03:00",
+          "item": {
+            "reference": "List/aba72f46-ef7c-4d62-9b4f-f1ebf021fa05"
+          }
+        },
+        {
+          "deleted": false,
+          "date": "2025-07-26T11:36:48+03:00",
+          "item": {
+            "reference": "Task/f8be449e-d131-4665-884e-df25ba1474a1"
           }
         }
       ]
@@ -29,13 +50,27 @@
   "questionnaire": "Questionnaire/truecover-add-location",
   "status": "completed",
   "subject": {
-    "reference": "Location/03e1125d-4ec4-4749-b525-d2afdc910043"
+    "reference": "Location/778b0f98-1bf9-4b3e-8a2b-eeefc3e3905e"
   },
-  "authored": "2025-07-11T08:39:35+03:00",
+  "authored": "2025-07-26T11:36:47+03:00",
   "author": {
     "reference": "Practitioner/9d4e583d-ceed-417d-a928-95cffe15b54f"
   },
   "item": [
+    {
+      "linkId": "was-survey-done",
+      "text": "Was survey done",
+      "answer": [
+        {
+          "valueCoding": {
+            "id": "29f1c80b-370c-44cd-863d-8087227a4959",
+            "system": "urn:uuid:b544556f-af7a-435e-8ed7-238628b89ed2",
+            "code": "yes",
+            "display": "Yes"
+          }
+        }
+      ]
+    },
     {
       "linkId": "survey-date",
       "text": "Date of survey",
@@ -116,6 +151,10 @@
           "valueString": "39.090815109935846"
         }
       ]
+    },
+    {
+      "linkId": "location-id",
+      "text": "Location ID"
     }
   ]
 }

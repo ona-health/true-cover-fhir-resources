@@ -69,16 +69,120 @@
   ],
   "item": [
     {
+      "linkId": "was-survey-done",
+      "type": "choice",
+      "text": "Was survey done",
+      "required": true,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "0724b4a4-e228-4a4d-8e83-834b7e874856",
+            "code": "yes",
+            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "51aec892-5e3f-43ae-bdef-e0ab14c160cc",
+            "code": "no",
+            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
+            "display": "No"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "reason-for-no-survey",
+      "type": "choice",
+      "text": "Reason for not doing the survey",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "454c1b75-ed86-40e8-81e4-31d868340392",
+            "code": "no-one-home",
+            "system": "urn:uuid:8031e79a-096f-4691-b0b5-40ad6c725178",
+            "display": "No one home"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "3a4b0ef5-0c82-482a-ea33-e379828cdda6",
+            "code": "person-refused",
+            "system": "urn:uuid:8031e79a-096f-4691-b0b5-40ad6c725178",
+            "display": "Person refused"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ],
+      "enableWhen": [
+        {
+          "question": "was-survey-done",
+          "operator": "=",
+          "answerCoding": {
+            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
+            "code": "no"
+          }
+        }
+      ]
+    },
+    {
       "linkId": "survey-date",
       "type": "date",
       "text": "Date of survey",
-      "required": true
+      "required": true,
+      "enableWhen": [
+        {
+          "question": "was-survey-done",
+          "operator": "=",
+          "answerCoding": {
+            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
+            "code": "yes"
+          }
+        }
+      ]
     },
     {
       "linkId": "house-hold-head-name",
       "type": "string",
       "text": "Head of household name?",
-      "required": true
+      "required": true,
+      "enableWhen": [
+        {
+          "question": "was-survey-done",
+          "operator": "=",
+          "answerCoding": {
+            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
+            "code": "yes"
+          }
+        }
+      ]
     },
     {
       "linkId": "phone-number",
@@ -90,7 +194,17 @@
           "valueString": "^((\\+|00)(\\d{1,3}))?\\d{5,12}$"
         }
       ],
-      "required": false
+      "required": false,
+      "enableWhen": [
+        {
+          "question": "was-survey-done",
+          "operator": "=",
+          "answerCoding": {
+            "system": "urn:uuid:725681fb-f633-42d7-85b9-6a484a9e308a",
+            "code": "yes"
+          }
+        }
+      ]
     },
     {
       "linkId": "location-widget",
@@ -315,6 +429,7 @@
             }
           ]
         }
+
       ],
       "linkId": "select-operational-area",
       "text": "Operational Area",

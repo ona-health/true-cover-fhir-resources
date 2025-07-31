@@ -10,83 +10,93 @@ group AddLocation(source src : QuestionnaireResponse, target bundle: Bundle) {
 group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle) {
     src -> bundle.entry as entry, entry.resource = create("Location") as loc then {
     	src -> loc.id = uuid() "r_loc_id";
-    	src -> loc.status =  "active" "r_loc_status";
-    	src -> loc.meta = create("Meta") as meta then {
-    	    src.item as province where(linkId="select-province") and answer.count()>0 then {
-                src -> meta.tag = create("Coding") as coding then {
-                    src -> coding.code = evaluate(province, $this.answer.value.reference.split("/")[1]) "r_loc_level_1_meta_code";
-                    src -> coding.system = "http://smartregister.org/CodeSystem/location-lineage" "r_loc_level_1_meta_system";
-                } "r_loc_level_1_meta_tag";
-            } "r_loc_level_1_meta_exists";
-            src.item as district where(linkId="select-district") and answer.count()>0 then {
-                src -> meta.tag = create("Coding") as coding then {
-                    src -> coding.code = evaluate(district, $this.answer.value.reference.split("/")[1]) "r_loc_level_2_meta_code";
-                    src -> coding.system = "http://smartregister.org/CodeSystem/location-lineage" "r_loc_level_2_meta_system";
-                } "r_loc_level_2_meta_tag";
-            } "r_loc_level_2_meta_exists";
-            src.item as operationalArea where(linkId="select-operational-area") and answer.count()>0 then {
-                src -> meta.tag = create("Coding") as coding then {
-                    src -> coding.code = evaluate(operationalArea, $this.answer.value.reference.split("/")[1]) "r_loc_level_3_meta_code";
-                    src -> coding.system = "http://smartregister.org/CodeSystem/location-lineage" "r_loc_level_3_meta_system";
-                } "r_loc_level_3_meta_tag";
-            } "r_loc_level_3_meta_exists";
-    	} "r_loc_meta";
-    	src.item as locName where(linkId="house-hold-head-name") and answer.count()>0 then {
-    	    src -> loc.name = evaluate(locName, $this.answer.value) "r_loc_name";
-    	} "r_loc_name_exists";
+    	// for existing locations
+        src.item as locationId where(linkId="location-id" and answer.count()>0 )  then {
+            src -> loc.id = create("id") as location_id then {
+                  src -> location_id.value = evaluate(locationId, $this.answer.value) "r_set_existing_location_id";
+              } "r_location_id";
+        } "r_location_exists";
 
-    	// Extract lat/long from dropped pin
-    	src.item as locLon where(linkId="positionLongitude") and answer.count()>0 then {
-    	    src.item as locLat where(linkId="positionLatitude") and answer.count()>0 then {
-                src -> loc.position = create("Location_Position") as pos then {
-                    src -> pos.longitude = evaluate(locLon, $this.answer.value)"r_loc_long";
-                    src -> pos.latitude = evaluate(locLat, $this.answer.value) "r_loc_lat";
-                } "r_loc_pos";
-            } "r_loc_lat_exists";
-        } "r_loc_lon_exists";
+        // for new locations
+        src.item as locationIdExists where(linkId="location-id" and answer.count()<1 ) then {
+            src -> loc.status =  "active" "r_loc_status";
+            src -> loc.meta = create("Meta") as meta then {
+                src.item as province where(linkId="select-province") and answer.count()>0 then {
+                    src -> meta.tag = create("Coding") as coding then {
+                        src -> coding.code = evaluate(province, $this.answer.value.reference.split("/")[1]) "r_loc_level_1_meta_code";
+                        src -> coding.system = "http://smartregister.org/CodeSystem/location-lineage" "r_loc_level_1_meta_system";
+                    } "r_loc_level_1_meta_tag";
+                } "r_loc_level_1_meta_exists";
+                src.item as district where(linkId="select-district") and answer.count()>0 then {
+                    src -> meta.tag = create("Coding") as coding then {
+                        src -> coding.code = evaluate(district, $this.answer.value.reference.split("/")[1]) "r_loc_level_2_meta_code";
+                        src -> coding.system = "http://smartregister.org/CodeSystem/location-lineage" "r_loc_level_2_meta_system";
+                    } "r_loc_level_2_meta_tag";
+                } "r_loc_level_2_meta_exists";
+                src.item as operationalArea where(linkId="select-operational-area") and answer.count()>0 then {
+                    src -> meta.tag = create("Coding") as coding then {
+                        src -> coding.code = evaluate(operationalArea, $this.answer.value.reference.split("/")[1]) "r_loc_level_3_meta_code";
+                        src -> coding.system = "http://smartregister.org/CodeSystem/location-lineage" "r_loc_level_3_meta_system";
+                    } "r_loc_level_3_meta_tag";
+                } "r_loc_level_3_meta_exists";
+            } "r_loc_meta";
+            src.item as locName where(linkId="house-hold-head-name") and answer.count()>0 then {
+                src -> loc.name = evaluate(locName, $this.answer.value) "r_loc_name";
+            } "r_loc_name_exists";
 
-        // Extract lat/long from GPS coordinates
-       src.item as locationWidgetItem where(linkId='location-widget') then {
-           src -> loc.position = create("Location_Position") as position then {
-                locationWidgetItem.item as itemLatitude where(linkId='latitude') then {
-                   src -> position.latitude = evaluate(src, itemLatitude.answer.value) "r-position-latitude";
-               } "r-latitude-item";
-               locationWidgetItem.item as itemLongitude where(linkId='longitude') then {
-                   src -> position.longitude = evaluate(src, itemLongitude.answer.value) "r-position-longitude";
-               } "r-longitude-item";
-           } "r_position_data";
-       } "r_loc_widget";
+            // Extract lat/long from dropped pin
+            src.item as locLon where(linkId="positionLongitude") and answer.count()>0 then {
+                src.item as locLat where(linkId="positionLatitude") and answer.count()>0 then {
+                    src -> loc.position = create("Location_Position") as pos then {
+                        src -> pos.longitude = evaluate(locLon, $this.answer.value)"r_loc_long";
+                        src -> pos.latitude = evaluate(locLat, $this.answer.value) "r_loc_lat";
+                    } "r_loc_pos";
+                } "r_loc_lat_exists";
+            } "r_loc_lon_exists";
 
-        src -> loc.type = create("CodeableConcept") as concept then {
-            src -> concept.coding = create("Coding") as coding then {
-                src -> coding.code = "bu" "r_building_loc_type_code";
-                src -> coding.display = "Building" "r_building_loc_type_display";
-                src -> coding.system = "http://terminology.hl7.org/CodeSystem/location-physical-type" "r_building_loc_type_system";
-                } "r_building_loc_type_coding";
-        } "r_building_loc_type";
+            // Extract lat/long from GPS coordinates
+           src.item as locationWidgetItem where(linkId='location-widget') then {
+               src -> loc.position = create("Location_Position") as position then {
+                    locationWidgetItem.item as itemLatitude where(linkId='latitude') then {
+                       src -> position.latitude = evaluate(src, itemLatitude.answer.value) "r-position-latitude";
+                   } "r-latitude-item";
+                   locationWidgetItem.item as itemLongitude where(linkId='longitude') then {
+                       src -> position.longitude = evaluate(src, itemLongitude.answer.value) "r-position-longitude";
+                   } "r-longitude-item";
+               } "r_position_data";
+           } "r_loc_widget";
 
-        src -> loc.type = create("CodeableConcept") as concept then {
-            src -> concept.coding = create("Coding") as coding then {
-                src -> coding.code = "5" "r_admin_level_loc_type_code";
-                src -> coding.display = "Level 5" "r_admin_level_loc_type_display";
-                src -> coding.system = "https://smartregister.org/codes/administrative-level" "r_admin_level_loc_type_system";
-            } "r_admin_level_loc_type_coding";
-        } "r_admin_level_loc_type_concept";
+            src -> loc.type = create("CodeableConcept") as concept then {
+                src -> concept.coding = create("Coding") as coding then {
+                    src -> coding.code = "bu" "r_building_loc_type_code";
+                    src -> coding.display = "Building" "r_building_loc_type_display";
+                    src -> coding.system = "http://terminology.hl7.org/CodeSystem/location-physical-type" "r_building_loc_type_system";
+                    } "r_building_loc_type_coding";
+            } "r_building_loc_type";
 
-        src -> loc.physicalType = create("CodeableConcept") as concept then {
-             src -> concept.coding = create("Coding") as coding then {
-                src -> coding.code = "bu" "r_loc_type_code";
-                src -> coding.display = "Building" "r_loc_type_display";
-                src -> coding.system = "http://terminology.hl7.org/CodeSystem/location-physical-type" "r_loc_type_system";
-            } "r_loc_type_coding";
-        } "r_loc_type_concept";
+            src -> loc.type = create("CodeableConcept") as concept then {
+                src -> concept.coding = create("Coding") as coding then {
+                    src -> coding.code = "5" "r_admin_level_loc_type_code";
+                    src -> coding.display = "Level 5" "r_admin_level_loc_type_display";
+                    src -> coding.system = "https://smartregister.org/codes/administrative-level" "r_admin_level_loc_type_system";
+                } "r_admin_level_loc_type_coding";
+            } "r_admin_level_loc_type_concept";
 
-        src.item as parentLoc where(linkId="select-operational-area") and answer.count()>0 then {
-            src -> loc.partOf = create("Reference") as ref then {
-                src -> ref.reference = evaluate(parentLoc, $this.answer.value.reference) "r_loc_part_of";
-                src -> ref.display = evaluate(parentLoc, $this.answer.value.display)  "r_loc_part_of_display";
-            } "r_loc_part_of_ref";
-        } "r_parent_location";
+            src -> loc.physicalType = create("CodeableConcept") as concept then {
+                 src -> concept.coding = create("Coding") as coding then {
+                    src -> coding.code = "bu" "r_loc_type_code";
+                    src -> coding.display = "Building" "r_loc_type_display";
+                    src -> coding.system = "http://terminology.hl7.org/CodeSystem/location-physical-type" "r_loc_type_system";
+                } "r_loc_type_coding";
+            } "r_loc_type_concept";
+
+            src.item as parentLoc where(linkId="select-operational-area") and answer.count()>0 then {
+                src -> loc.partOf = create("Reference") as ref then {
+                    src -> ref.reference = evaluate(parentLoc, $this.answer.value.reference) "r_loc_part_of";
+                    src -> ref.display = evaluate(parentLoc, $this.answer.value.display)  "r_loc_part_of_display";
+                } "r_loc_part_of_ref";
+            } "r_parent_location";
+        } "r_location_not_exists";
 
         src then ExtractGroup(src, loc ,bundle) "r_extract_group";
     } "r_loc";
@@ -134,6 +144,7 @@ group ExtractGroup(source src : QuestionnaireResponse, source location : Locatio
        } "r_group_char_v";
 
        src then ExtractList(src, location, group, bundle) "r_extract_list";
+       src then  ExtractTask(src, location, bundle) "r_extract_task";
     } "r_group_bundle_entry";
 }
 
@@ -161,4 +172,63 @@ group ExtractList(source src : QuestionnaireResponse, source location : Location
             src -> entry.item = reference(group) "r_list_group_entry";
         } "r_list_entry";
     } "r_list_bundle_entry";
+}
+
+group ExtractTask(source src : QuestionnaireResponse, source location : Location, target bundle : Bundle){
+    src -> bundle.entry as entry, entry.resource = create('Task') as task then {
+        src -> task.id = uuid(),
+               task.identifier = create('Identifier') as iden, iden.value = 'hh_survey', iden.use = 'official',
+               task.status = 'completed',
+               task.intent = 'plan',
+               task.priority = 'routine',
+               task.description = 'Household Survey',
+               task.for = create('Reference') as ref, ref.reference = evaluate(location, type().name + '/' + $this.id.replaceMatches('/_history/.*', '')),
+               task.authoredOn = evaluate(src, now()),
+               task.requester = evaluate(src, $this.generalPractitioner.first()),
+               task.owner = evaluate(src, $this.generalPractitioner.first()) "r_task_data";
+
+        // task groupIdentifier
+        src -> task.groupIdentifier = create('Identifier') as groupIdentifier then {
+            src -> groupIdentifier.value = 'app_generated' "r_group_identifier_value";
+            src -> groupIdentifier.use = "secondary" "r_group_identifier_use";
+        } "r_group_identifier";
+
+        src then extractPeriod(src, task) "r_task_period_extr";
+
+        src -> task.reasonReference = create('Reference') as ref,
+                       ref.reference = 'Questionnaire/truecover-add-location' "r_task_reason_ref";
+
+        src -> task.code = create('CodeableConcept') as taskCode then{
+                    src -> taskCode.coding = create("Coding") as coding then {
+                        src -> coding.system = "https://smartregister.org/" "r_cp_cod_system_v";
+                        src -> coding.code = 'hh_survey' "r_cp_cod_value_v";
+                        src -> coding.display = 'Hosehold Survey' "r_cp_cod_disp_v";
+                    } "r_grp_vcode";
+                    src -> taskCode.text = 'Hosehold Survey' "r_code_text";
+        } "r_task_code_v";
+    } "r_task_bundle_entry";
+}
+
+group extractPeriod(source subject: Location, target task: Task) {
+    subject -> evaluate(task, now()) as start, evaluate(task, now()) as end then {
+        subject -> create('Period') as period then {
+
+         subject -> create('date') as startDate,
+                    startDate.value = evaluate(start, $this.value.substring(0,7) + '-01'),
+                    create('date') as maxMonth,
+                    maxMonth.value = evaluate(end, $this.value.substring(0,7) + '-01'),
+                    evaluate(maxMonth, $this + '365 \'days\''.toQuantity()) as endDate
+                    then extractPeriodTime(startDate, endDate, period) "r_task_period_extr";
+
+            subject -> task.executionPeriod = period "r_task_per";
+        } "rule_period";
+    } "r_per";
+}
+
+group extractPeriodTime(source start: DateType, source end: DateType, target period: Period) {
+    start -> period.start = create('dateTime') as dt,
+             dt.value = evaluate(start, $this.value.substring(0,10) + 'T00:00:00.00Z') "r_per_start";
+
+    end -> period.end = create('dateTime') as dt,
+           dt.value = evaluate(end, $this.value.substring(0,10) + 'T00:00:00.00Z') "r_per_end";
 }
