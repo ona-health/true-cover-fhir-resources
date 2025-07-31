@@ -187,6 +187,12 @@ group ExtractTask(source src : QuestionnaireResponse, source location : Location
                task.requester = evaluate(src, $this.generalPractitioner.first()),
                task.owner = evaluate(src, $this.generalPractitioner.first()) "r_task_data";
 
+        // task groupIdentifier
+        src -> task.groupIdentifier = create('Identifier') as groupIdentifier then {
+            src -> groupIdentifier.value = 'app_generated' "r_group_identifier_value";
+            src -> groupIdentifier.use = "secondary" "r_group_identifier_use";
+        } "r_group_identifier";
+
         src then extractPeriod(src, task) "r_task_period_extr";
 
         src -> task.reasonReference = create('Reference') as ref,
