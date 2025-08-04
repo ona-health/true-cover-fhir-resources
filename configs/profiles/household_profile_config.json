@@ -53,6 +53,12 @@
             "order": "DESCENDING"
           }
         ]
+      },
+      {
+        "id": "availableLists",
+        "resource": "List",
+        "searchParameter": "item",
+        "isRevInclude": true
       }
     ]
   },
@@ -130,6 +136,13 @@
       "condition": "true",
       "actions": [
         "data.put('humanReadableId', service.generateRandomSixDigitInt())"
+      ]
+    },
+    {
+      "name": "locationId",
+      "condition": "true",
+      "actions": [
+        "data.put('locationId', fhirPath.extractValue(availableLists.get(0), 'List.subject.reference'))"
       ]
     }
   ],
@@ -247,8 +260,8 @@
                         "trigger": "ON_CLICK",
                         "workflow": "LAUNCH_QUESTIONNAIRE",
                         "questionnaire": {
-                          "id": "truecover-child-survey",
-                          "title": "Child Survey",
+                          "id": "truecover-add-location",
+                          "title": "Add Household",
                           "saveButtonText": "Save",
                           "resourceIdentifier": "@{patientLogicalId}"
                         },
@@ -265,5 +278,35 @@
       ]
     }
   ],
-  "overFlowMenuItems": []
+  "overFlowMenuItems": [
+    {
+      "title": "Survey info",
+      "titleColor": "#000000",
+      "visible": "true",
+      "enabled": "true",
+      "actions": [
+        {
+          "trigger": "ON_CLICK",
+          "workflow": "LAUNCH_QUESTIONNAIRE",
+          "questionnaire": {
+            "id": "truecover-add-location",
+            "title": "Household suvey info",
+            "saveButtonText": "Update survey",
+            "type": "EDIT",
+            "resourceIdentifier": "@{locationId}",
+            "resourceType": "Location",
+            "extraParams": [
+              {
+                "paramType": "PREPOPULATE",
+                "linkId": "location-id",
+                "dataType": "STRING",
+                "key": "locationId",
+                "value": "@{locationId}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
 }
