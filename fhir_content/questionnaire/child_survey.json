@@ -22,7 +22,7 @@
   "item": [
     {
       "linkId": "opensrp-id",
-      "type": "string",
+      "type": "integer",
       "readOnly": true,
       "extension": [
         {

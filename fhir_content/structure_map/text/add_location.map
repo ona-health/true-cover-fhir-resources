@@ -17,8 +17,12 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
               } "r_location_id";
         } "r_location_exists";
 
+        src.item as locName where(linkId="house-hold-head-name") and answer.count()>0 then {
+            src -> loc.name = evaluate(locName, $this.answer.value) "r_loc_name";
+        } "r_loc_name_exists";
+
         // for new locations
-        src.item as locationIdExists where(linkId="location-id" and answer.count()<1 ) then {
+        src where( item.where( linkId="location-id" and answer.count()<1).exists() ) then {
             src -> loc.status =  "active" "r_loc_status";
             src -> loc.meta = create("Meta") as meta then {
                 src.item as province where(linkId="select-province") and answer.count()>0 then {
@@ -40,9 +44,6 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
                     } "r_loc_level_3_meta_tag";
                 } "r_loc_level_3_meta_exists";
             } "r_loc_meta";
-            src.item as locName where(linkId="house-hold-head-name") and answer.count()>0 then {
-                src -> loc.name = evaluate(locName, $this.answer.value) "r_loc_name";
-            } "r_loc_name_exists";
 
             // Extract lat/long from dropped pin
             src.item as locLon where(linkId="positionLongitude") and answer.count()>0 then {
@@ -97,7 +98,6 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
                 } "r_loc_part_of_ref";
             } "r_parent_location";
         } "r_location_not_exists";
-
         src then ExtractGroup(src, loc ,bundle) "r_extract_group";
     } "r_loc";
 }
@@ -105,43 +105,53 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
 group ExtractGroup(source src : QuestionnaireResponse, source location : Location, target bundle : Bundle) {
     src -> bundle.entry as entry, entry.resource = create("Group") as group then {
        src -> group.id = uuid() "rule_group_id_value";
+       // for existing groups
+       src.item as groupId where(linkId="group-id" and answer.count()>0 )  then {
+           src -> group.id = create("id") as group_id then {
+                 src -> group_id.value = evaluate(groupId, $this.answer.value) "r_set_existing_group_id";
+             } "r_group_id";
+       } "r_group_exists";
+
        src -> group.name = evaluate(src, $this.item.where(linkId = 'house-hold-head-name').answer.value) "rule_group_name";
-
-       src -> group.identifier = create('Identifier') as groupIdentifier then {
-          src -> groupIdentifier.value = uuid() "rule_group_identifier_value";
-          src -> groupIdentifier.use = "secondary" "rule_group_identifier_use";
-          src -> groupIdentifier.period = create('Period') as period, period.start = evaluate(src, $this.authored) "rule_group_identifier_period";
-       } "rule_group_identifier";
-
-       src -> group.active = true "r_grp_status_data";
-
-       src -> group.characteristic = create('Group_Characteristic') as includeFamily then {
-           src -> includeFamily.exclude = false "rule_exclude_group_false";
-       } "rule_group_char";
-
-       src -> group.characteristic = create('Group_Characteristic') as familyCharacteristic then {
-           src -> familyCharacteristic.code = create('CodeableConcept') as familyCharacteristicCode then{
-               src -> familyCharacteristicCode.coding = c("https://smartregister.org/", "active") as coding then {
-               src -> coding.display = 'Active' "r_cp_cod_disp_v";
-               } "r_grp_vcode";
-           } "rule_group_char_code";
-       } "rule_group_char";
-
        src -> group.type = 'person' "r_grp_type_data";
        src -> group.actual = true "r_grp_actual_data";
-       src -> group.code = create('CodeableConcept') as concept then ExtractFamilyCode(src, concept) "r_grp_code_data";
 
-        // Add location characteristic
-       src -> group.characteristic = create ('Group_Characteristic') as groupCharacteristic then {
-            src -> groupCharacteristic.code = create('CodeableConcept') as locationCode then{
-                src -> locationCode.coding = c("https://smartregister.org/", "hh_location") as coding then {
-                    src -> coding.display = 'Household location' "r_cp_cod_disp_v";
-                } "r_grp_vcode";
-            } "r_cp_cc_coding_v";
+       // Non editable fields are only populated if the group does not exist
+       src where( item.where( linkId="group-id" and answer.count()<1).exists() ) then {
+           src -> group.identifier = create('Identifier') as groupIdentifier then {
+              src -> groupIdentifier.value = uuid() "rule_group_identifier_value";
+              src -> groupIdentifier.use = "secondary" "rule_group_identifier_use";
+              src -> groupIdentifier.period = create('Period') as period, period.start = evaluate(src, $this.authored) "rule_group_identifier_period";
+           } "rule_group_identifier";
 
-            src -> groupCharacteristic.value = create('Reference') as ref, ref.reference = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) "r_group_char_v";
-            src -> groupCharacteristic.exclude = false "r_group_char_exclude_v";
-       } "r_group_char_v";
+           src -> group.active = true "r_grp_status_data";
+
+           src -> group.characteristic = create('Group_Characteristic') as includeFamily then {
+               src -> includeFamily.exclude = false "rule_exclude_group_false";
+           } "rule_group_char";
+
+           src -> group.characteristic = create('Group_Characteristic') as familyCharacteristic then {
+               src -> familyCharacteristic.code = create('CodeableConcept') as familyCharacteristicCode then{
+                   src -> familyCharacteristicCode.coding = c("https://smartregister.org/", "active") as coding then {
+                   src -> coding.display = 'Active' "r_cp_cod_disp_v";
+                   } "r_grp_vcode";
+               } "rule_group_char_code";
+           } "rule_group_char";
+
+           src -> group.code = create('CodeableConcept') as concept then ExtractFamilyCode(src, concept) "r_grp_code_data";
+
+            // Add location characteristic
+           src -> group.characteristic = create ('Group_Characteristic') as groupCharacteristic then {
+                src -> groupCharacteristic.code = create('CodeableConcept') as locationCode then{
+                    src -> locationCode.coding = c("https://smartregister.org/", "hh_location") as coding then {
+                        src -> coding.display = 'Household location' "r_cp_cod_disp_v";
+                    } "r_grp_vcode";
+                } "r_cp_cc_coding_v";
+
+                src -> groupCharacteristic.value = create('Reference') as ref, ref.reference = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) "r_group_char_v";
+                src -> groupCharacteristic.exclude = false "r_group_char_exclude_v";
+           } "r_group_char_v";
+       } "r_group_not_exists";
 
        src then ExtractList(src, location, group, bundle) "r_extract_list";
        src then  ExtractTask(src, location, bundle) "r_extract_task";
@@ -158,54 +168,77 @@ group ExtractFamilyCode(source src : Group, target concept: CodeableConcept) {
 group ExtractList(source src : QuestionnaireResponse, source location : Location, source group : Group, target bundle : Bundle) {
     src -> bundle.entry as entry, entry.resource = create("List") as list then {
         src -> list.id = uuid() "r_list_id";
+        // For existing list
+        src.item as listId where(linkId="list-id" and answer.count()>0 )  then {
+            src -> list.id = create("id") as list_id then {
+                  src -> list_id.value = evaluate(listId, $this.answer.value) "r_set_existing_list_id";
+              } "r_list_id";
+        } "r_list_exists";
+
         src -> list.status = 'current' "r_list_status";
         src -> list.title = evaluate(location,  $this.name + ' related resources list') "r_list_title";
-        src -> list.subject = reference(location) "r_list-subject";
-        src -> list.code = create('CodeableConcept') as listCode then{
-             src -> listCode.coding = create("Coding") as coding then {
-                 src -> coding.system = "https://smartregister.org/" "r_cp_cod_system_v";
-                 src -> coding.code = 'related_resource_link' "r_cp_cod_value_v";
-                 src -> coding.display = 'Related resources list' "r_cp_cod_disp_v";
-             } "r_grp_vcode";
-        } "r_list_code_v";
-        src -> list.entry = create("List_Entry") as entry then {
-            src -> entry.item = reference(group) "r_list_group_entry";
-        } "r_list_entry";
+
+        // Non editable fields are only populated if the list does not exist
+        src where( item.where( linkId="list-id" and answer.count()<1).exists() ) then {
+            src -> list.subject = create('Reference') as ref, ref.reference = evaluate(location, type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) "r_list-subject";
+            src -> list.code = create('CodeableConcept') as listCode then{
+                 src -> listCode.coding = create("Coding") as coding then {
+                     src -> coding.system = "https://smartregister.org/" "r_cp_cod_system_v";
+                     src -> coding.code = 'related_resource_link' "r_cp_cod_value_v";
+                     src -> coding.display = 'Related resources list' "r_cp_cod_disp_v";
+                 } "r_grp_vcode";
+            } "r_list_code_v";
+            src -> list.entry = create("List_Entry") as entry then {
+                src -> entry.item = create('Reference') as ref, ref.reference = evaluate(group, type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) "r_list_group_entry";
+            } "r_list_entry";
+        } "r_list_not_exists";
+
     } "r_list_bundle_entry";
 }
 
 group ExtractTask(source src : QuestionnaireResponse, source location : Location, target bundle : Bundle){
     src -> bundle.entry as entry, entry.resource = create('Task') as task then {
-        src -> task.id = uuid(),
-               task.identifier = create('Identifier') as iden, iden.value = 'hh_survey', iden.use = 'official',
-               task.status = 'completed',
-               task.intent = 'plan',
-               task.priority = 'routine',
-               task.description = 'Household Survey',
-               task.for = create('Reference') as ref, ref.reference = evaluate(location, type().name + '/' + $this.id.replaceMatches('/_history/.*', '')),
-               task.authoredOn = evaluate(src, now()),
-               task.requester = evaluate(src, $this.generalPractitioner.first()),
-               task.owner = evaluate(src, $this.generalPractitioner.first()) "r_task_data";
+        src -> task.id = uuid() "r_task_id";
+        // for existing locations
+        src.item as taskId where(linkId="task-id" and answer.count()>0 )  then {
+           src -> task.id = create("id") as task_id then {
+                 src -> task_id.value = evaluate(taskId, $this.answer.value) "r_set_existing_task_id";
+             } "r_task_id";
+        } "r_location_exists";
 
-        // task groupIdentifier
-        src -> task.groupIdentifier = create('Identifier') as groupIdentifier then {
-            src -> groupIdentifier.value = 'app_generated' "r_group_identifier_value";
-            src -> groupIdentifier.use = "secondary" "r_group_identifier_use";
-        } "r_group_identifier";
+        // Non editable fields are only populated if the list does not exist
+        src where( item.where( linkId="task-id" and answer.count()<1).exists() ) then {
+            src -> task.identifier = create('Identifier') as iden, iden.value = 'hh_survey', iden.use = 'official',
+                   task.status = 'completed',
+                   task.intent = 'plan',
+                   task.priority = 'routine',
+                   task.description = 'Household Survey',
+                   task.for = create('Reference') as ref, ref.reference = evaluate(location, type().name + '/' + $this.id.replaceMatches('/_history/.*', '')),
+                   task.authoredOn = evaluate(src, now()),
+                   task.requester = evaluate(src, $this.generalPractitioner.first()),
+                   task.owner = evaluate(src, $this.generalPractitioner.first()) "r_task_data";
 
-        src then extractPeriod(src, task) "r_task_period_extr";
 
-        src -> task.reasonReference = create('Reference') as ref,
-                       ref.reference = 'Questionnaire/truecover-add-location' "r_task_reason_ref";
+            // task groupIdentifier
+            src -> task.groupIdentifier = create('Identifier') as groupIdentifier then {
+                src -> groupIdentifier.value = 'app_generated' "r_group_identifier_value";
+                src -> groupIdentifier.use = "secondary" "r_group_identifier_use";
+            } "r_group_identifier";
 
-        src -> task.code = create('CodeableConcept') as taskCode then{
-                    src -> taskCode.coding = create("Coding") as coding then {
-                        src -> coding.system = "https://smartregister.org/" "r_cp_cod_system_v";
-                        src -> coding.code = 'hh_survey' "r_cp_cod_value_v";
-                        src -> coding.display = 'Hosehold Survey' "r_cp_cod_disp_v";
-                    } "r_grp_vcode";
-                    src -> taskCode.text = 'Hosehold Survey' "r_code_text";
-        } "r_task_code_v";
+            src then extractPeriod(src, task) "r_task_period_extr";
+
+            src -> task.reasonReference = create('Reference') as ref,
+                           ref.reference = 'Questionnaire/truecover-add-location' "r_task_reason_ref";
+
+            src -> task.code = create('CodeableConcept') as taskCode then{
+                        src -> taskCode.coding = create("Coding") as coding then {
+                            src -> coding.system = "https://smartregister.org/" "r_cp_cod_system_v";
+                            src -> coding.code = 'hh_survey' "r_cp_cod_value_v";
+                            src -> coding.display = 'Hosehold Survey' "r_cp_cod_disp_v";
+                        } "r_grp_vcode";
+                        src -> taskCode.text = 'Hosehold Survey' "r_code_text";
+            } "r_task_code_v";
+        } "r_task_not_exist";
     } "r_task_bundle_entry";
 }
 
