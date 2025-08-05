@@ -154,7 +154,34 @@
     },
     {
       "linkId": "location-id",
-      "text": "Location ID"
+      "text": "Location ID",
+      "answer": [
+        {
+          "valueString": "Location/78f92585-73f0-402c-85f6-761fbdc40171"
+        }
+      ]
+    },
+    {
+      "linkId": "group-id",
+      "text": "Group ID",
+      "answer": [
+        {
+          "valueString": "43479c85-59e2-480c-949a-fce825f89947"
+        }
+      ]
+    },
+    {
+      "linkId": "list-id",
+      "text": "List ID",
+      "answer": [
+        {
+          "valueString": "7d18ed09-2cfa-4a94-ac06-7de5da8619db"
+        }
+      ]
+    },
+    {
+      "linkId": "task-id",
+      "text": "Task ID"
     }
   ]
 }
