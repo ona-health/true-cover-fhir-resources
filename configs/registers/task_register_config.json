@@ -14,23 +14,44 @@
         }
       ],
       "dataQueries": [
+        {
+          "paramName": "status",
+          "operation": "OR",
+          "filterCriteria": [
+            {
+              "dataType": "CODE",
+              "value": {
+                "system": "http://hl7.org/fhir/task-status",
+                "code": "completed"
+              }
+            }
+          ]
+        }
       ]
     },
     "relatedResources": [
       {
-        "resource": "Practitioner",
+        "id": "availableLocations",
+        "resource": "Location",
         "isRevInclude": false,
-        "searchParameter": "owner"
+        "searchParameter": "subject",
+        "relatedResources": [
+          {
+            "id": "availableLists",
+            "resource": "List",
+            "isRevInclude": true,
+            "searchParameter": "subject"
+          }
+        ]
       }
     ]
   },
   "searchBar": {
     "visible": true,
-    "display": "{{ search.by.task.practitioner }}",
+    "display": "{{ search.by.task.location.name }}",
     "computedRules": [
       "taskName",
-      "practitionerName",
-      "patientName"
+      "locationName"
     ]
   },
   "registerCard": {
@@ -57,10 +78,10 @@
         ]
       },
       {
-        "name": "taskStatusColorCode",
+        "name": "taskServiceStatus",
         "condition": "true",
         "actions": [
-          "data.put('taskStatusColorCode', service.generateTaskServiceStatus(Task.get(0)) )"
+          "data.put('taskServiceStatus', service.generateTaskServiceStatus(Task) )"
         ]
       },
       {
@@ -92,10 +113,17 @@
         ]
       },
       {
-        "name": "practitionerName",
+        "name": "locationName",
         "condition": "true",
         "actions": [
-          "data.put('practitionerName', fhirPath.extractValue(Practitioner.get(0), \"Practitioner.name.select(given + ' ' + family)\"))"
+          "data.put('locationName', size(availableLocations) > 0 ? fhirPath.extractValue(availableLocations.get(0), \"Location.name\") : '')"
+        ]
+      },
+      {
+        "name": "familyLogicalId",
+        "condition": "true",
+        "actions": [
+          "data.put('familyLogicalId', size(availableLists) > 0 ? fhirPath.extractValue(availableLists.get(0), \"List.entry[0].item.reference.split('/')[1]\") : '')"
         ]
       }
     ],
@@ -108,24 +136,12 @@
             "details": [
               {
                 "viewType": "COMPOUND_TEXT",
-                "primaryText": "@{taskName}",
+                "primaryText": "@{locationName}",
                 "primaryTextColor": "#000000"
               },
               {
                 "viewType": "COMPOUND_TEXT",
-                "primaryText": "{{ task.start.date }}",
-                "primaryTextColor": "#5A5A5A",
-                "fontSize": 14.0
-              },
-              {
-                "viewType": "COMPOUND_TEXT",
-                "primaryText": "{{ patient.col.name }}",
-                "primaryTextColor": "#5A5A5A",
-                "fontSize": 14.0
-              },
-              {
-                "viewType": "COMPOUND_TEXT",
-                "primaryText": "{{ practitioner.col.name}}",
+                "primaryText": "@{taskName}",
                 "primaryTextColor": "#5A5A5A",
                 "fontSize": 14.0
               }
@@ -133,23 +149,27 @@
             "showVerticalDivider": false,
             "serviceButton": {
               "visible": true,
+              "enabled": true,
               "text": "@{taskStatus}",
-              "status": "@{taskStatusColorCode}",
+              "status": "@{taskServiceStatus}",
               "smallSized": false,
               "actions": [
-                {
-                  "trigger": "ON_CLICK",
-                  "workflow": "LAUNCH_QUESTIONNAIRE",
-                  "questionnaire": {
-                    "id": "@{taskQuestionnaireId}",
-                    "title": "@{taskDescription}",
-                    "saveButtonText": "Save",
-                    "taskId": "@{taskId}",
-                    "resourceIdentifier": "@{taskFor}"
-                  }
-                }
               ]
-            }
+            },
+            "actions": [
+              {
+                "trigger": "ON_CLICK",
+                "workflow": "LAUNCH_PROFILE",
+                "id": "householdProfile",
+                "params": [
+                  {
+                    "paramType": "RESOURCE_ID",
+                    "key": "familyLogicalId",
+                    "value": "@{familyLogicalId}"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }

@@ -25,6 +25,26 @@
           }
         }
       ]
+    },
+    {
+      "id": "taskRegister",
+      "display": "{{ visited.homes }}",
+      "showCount": true,
+      "menuIconConfig": {
+        "type": "local",
+        "reference": "ic_profile"
+      },
+      "actions": [
+        {
+          "trigger": "ON_CLICK",
+          "workflow": "LAUNCH_REGISTER",
+          "id": "taskRegister"
+        },
+        {
+          "trigger": "ON_COUNT",
+          "id": "taskRegister"
+        }
+      ]
     }
   ],
   "staticMenu": [

@@ -151,10 +151,11 @@ group ExtractGroup(source src : QuestionnaireResponse, source location : Locatio
                 src -> groupCharacteristic.value = create('Reference') as ref, ref.reference = evaluate(location,  $this.type().name + '/' + $this.id.replaceMatches('/_history/.*', '')) "r_group_char_v";
                 src -> groupCharacteristic.exclude = false "r_group_char_exclude_v";
            } "r_group_char_v";
+           // Tasks are placed here since they are not to be edited
+           src then  ExtractTask(src, location, bundle) "r_extract_task";
        } "r_group_not_exists";
 
        src then ExtractList(src, location, group, bundle) "r_extract_list";
-       src then  ExtractTask(src, location, bundle) "r_extract_task";
     } "r_group_bundle_entry";
 }
 
