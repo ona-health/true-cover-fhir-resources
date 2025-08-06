@@ -174,5 +174,27 @@
         ]
       }
     ]
+  },
+  "topScreenSection": {
+    "title": "{{ visited.homes }}",
+    "searchBar": {
+    },
+    "menuIcons": [
+      {
+        "viewType": "IMAGE",
+        "size": 20,
+        "imageConfig": {
+          "type": "local",
+          "reference": "ic_toggle_map_view"
+        },
+        "actions": [
+          {
+            "trigger": "ON_CLICK",
+            "workflow": "LAUNCH_MAP",
+            "id": "locationMap"
+          }
+        ]
+      }
+    ]
   }
 }

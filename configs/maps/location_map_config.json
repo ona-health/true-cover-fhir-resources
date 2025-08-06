@@ -326,6 +326,20 @@
             }
           }
         ]
+      },
+      {
+        "viewType": "IMAGE",
+        "imageConfig": {
+          "type": "local",
+          "reference": "ic_service_points"
+        },
+        "actions": [
+          {
+            "trigger": "ON_CLICK",
+            "workflow": "LAUNCH_REGISTER",
+            "id": "taskRegister"
+          }
+        ]
       }
     ]
   },
