@@ -8,6 +8,28 @@
   },
   "clientRegisters": [
     {
+      "id": "taskRegister",
+      "display": "{{ visited.homes }}",
+      "showCount": true,
+      "menuIconConfig": {
+        "type": "local",
+        "reference": "ic_service_points"
+      },
+      "actions": [
+        {
+          "trigger": "ON_CLICK",
+          "workflow": "LAUNCH_REGISTER",
+          "id": "taskRegister"
+        },
+        {
+          "trigger": "ON_COUNT",
+          "id": "taskRegister"
+        }
+      ]
+    }
+  ],
+  "staticMenu": [
+    {
       "id": "addLocation",
       "display": "{{ add.household}}",
       "menuIconConfig": {
@@ -25,9 +47,7 @@
           }
         }
       ]
-    }
-  ],
-  "staticMenu": [
+    },
     {
       "id": "location",
       "visible": true,
