@@ -98,7 +98,11 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
                 } "r_loc_part_of_ref";
             } "r_parent_location";
         } "r_location_not_exists";
-        src then ExtractGroup(src, loc ,bundle) "r_extract_group";
+
+        //Only extract Group,List and Task when household survey has been done
+        src where( item.where( linkId="was-survey-done" and answer.count() > 0 and answer.value.code = 'yes').exists() ) then {
+            src then ExtractGroup(src, loc ,bundle) "r_extract_group";
+        } "r_survey_done";
     } "r_loc";
 }
 
