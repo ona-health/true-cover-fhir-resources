@@ -89,7 +89,8 @@
     {
       "id": "ActionButton",
       "visible": true,
-      "display": "{{ add.member }}",
+      "animate": false,
+      "display": "{{ add.child }}",
       "menuIconConfig": {
         "type": "local",
         "reference": "ic_add"
