@@ -470,6 +470,58 @@
       "type": "string",
       "readOnly": true,
       "required": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ],
+      "linkId": "location-id",
+      "text": "Location ID",
+      "type": "string",
+      "readOnly": true,
+      "required": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ],
+      "linkId": "group-id",
+      "text": "Group ID",
+      "type": "string",
+      "readOnly": true,
+      "required": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ],
+      "linkId": "list-id",
+      "text": "List ID",
+      "type": "string",
+      "readOnly": true,
+      "required": false
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ],
+      "linkId": "task-id",
+      "text": "Task ID",
+      "type": "string",
+      "readOnly": true,
+      "required": false
     }
   ]
 }

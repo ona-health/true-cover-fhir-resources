@@ -58,7 +58,30 @@
         "id": "availableLists",
         "resource": "List",
         "searchParameter": "item",
-        "isRevInclude": true
+        "isRevInclude": true,
+        "relatedResources": [
+          {
+            "id": "availableLocations",
+            "resource": "Location",
+            "searchParameter": "subject",
+            "isRevInclude": false,
+            "relatedResources": [
+              {
+                "id": "availableQuestionnaireResponses",
+                "resource": "QuestionnaireResponse",
+                "searchParameter": "subject",
+                "isRevInclude": true,
+                "sortConfigs": [
+                  {
+                    "paramName": "_lastUpdated",
+                    "dataType": "DATE",
+                    "order": "DESCENDING"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     ]
   },
@@ -66,7 +89,8 @@
     {
       "id": "ActionButton",
       "visible": true,
-      "display": "{{ add.member }}",
+      "animate": false,
+      "display": "{{ add.child }}",
       "menuIconConfig": {
         "type": "local",
         "reference": "ic_add"
@@ -150,6 +174,13 @@
       "condition": "true",
       "actions": [
         "data.put('listId', fhirPath.extractValue(availableLists.get(0), 'List.id'))"
+      ]
+    },
+    {
+      "name": "questionnaireId",
+      "condition": "true",
+      "actions": [
+        "data.put('questionnaireId', size(availableQuestionnaireResponses) > 0 ? fhirPath.extractValue(availableQuestionnaireResponses.get(0), \"QuestionnaireResponse.questionnaire.split('/')[1]\") : '')"
       ]
     }
   ],
@@ -299,7 +330,7 @@
           "trigger": "ON_CLICK",
           "workflow": "LAUNCH_QUESTIONNAIRE",
           "questionnaire": {
-            "id": "truecover-add-location",
+            "id": "@{questionnaireId}",
             "title": "Household suvey info",
             "saveButtonText": "Update survey",
             "type": "EDIT",
