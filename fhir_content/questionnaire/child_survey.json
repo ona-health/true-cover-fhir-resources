@@ -293,6 +293,19 @@
           "type": "display"
         }
       ]
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ],
+      "linkId": "related-entity-location",
+      "text": "Operational Are ID",
+      "type": "string",
+      "readOnly": true,
+      "required": false
     }
   ]
 }

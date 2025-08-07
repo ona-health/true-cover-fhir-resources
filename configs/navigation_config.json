@@ -43,7 +43,13 @@
           "questionnaire": {
             "id": "truecover-add-location-using-gps",
             "title": "Add Household",
-            "saveButtonText": "Save"
+            "saveButtonText": "Save",
+            "linkIds": [
+              {
+                "type": "LOCATION",
+                "linkId": "select-operational-area"
+              }
+            ]
           }
         }
       ]
