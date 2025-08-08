@@ -23,6 +23,12 @@
     "saveButtonText": "{{ save }}",
     "setPractitionerDetails": true,
     "setOrganizationDetails": true,
+    "linkIds": [
+      {
+        "type": "LOCATION",
+        "linkId": "select-operational-area"
+      }
+    ],
     "extraParams": [
       {
         "paramType": "PREPOPULATE",
