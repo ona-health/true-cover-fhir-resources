@@ -9,7 +9,10 @@
         "code": "_id",
         "base": [
           "QuestionnaireResponse",
-          "Task"
+          "Group",
+          "List",
+          "Task",
+          "Patient"
         ]
       }
     },
@@ -68,7 +71,10 @@
         "code": "_count",
         "base": [
           "QuestionnaireResponse",
-          "Task"
+          "Group",
+          "List",
+          "Task",
+          "Patient"
         ],
         "type": "token",
         "expression": "#count"
