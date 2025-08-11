@@ -107,6 +107,12 @@
               "groupIdentifier": "@{familyLogicalId}",
               "memberResourceType": "Patient"
             },
+            "linkIds": [
+              {
+                "type": "LOCATION",
+                "linkId": "related-entity-location"
+              }
+            ],
             "snackBarMessage": {
               "message": "Child has been added",
               "actionLabel": "",
@@ -120,6 +126,13 @@
               "dataType": "INTEGER",
               "key": "opensrpId",
               "value": "@{humanReadableId}"
+            },
+            {
+              "paramType": "PREPOPULATE",
+              "linkId": "related-entity-location",
+              "dataType": "STRING",
+              "key": "relatedEntityLocation",
+              "value": "@{relatedEntityLocation}"
             }
           ]
         }
@@ -153,6 +166,13 @@
       "condition": "true",
       "actions": [
         "data.put('familyLogicalId', fhirPath.extractValue(Group, 'Group.id'))"
+      ]
+    },
+    {
+      "name": "relatedEntityLocation",
+      "condition": "true",
+      "actions": [
+        "data.put('relatedEntityLocation', fhirPath.extractValue(Group, \"Group.meta.tag.where(system = 'https://smartregister.org/related-entity-location-tag-id').code\"))"
       ]
     },
     {
