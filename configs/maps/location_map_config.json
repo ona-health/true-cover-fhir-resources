@@ -234,7 +234,7 @@
         "name": "type",
         "condition": "true",
         "actions": [
-          "data.put('type', fhirPath.extractValue(Location, \"Location.type.where(coding.system = 'http://smartregister.org/CodeSystem/eusm-service-point-type').coding.code\") != '' ? fhirPath.extractValue(Location, \"Location.type.where(coding.system = 'http://smartregister.org/CodeSystem/eusm-service-point-type').coding.code\") : fhirPath.extractValue(Location, \"Location.type.where(coding.system = 'http://terminology.hl7.org/CodeSystem/location-type').coding.code\"))"
+          "data.put('type', fhirPath.extractValue(Location, \"Location.type.where(coding.system = 'http://smartregister.org/CodeSystem/true_cover-point-type').coding.code\") != '' ? fhirPath.extractValue(Location, \"Location.type.where(coding.system = 'http://smartregister.org/CodeSystem/true_cover-point-type').coding.code\") : fhirPath.extractValue(Location, \"Location.type.where(coding.system = 'http://terminology.hl7.org/CodeSystem/location-type').coding.code\"))"
         ]
       },
       {
@@ -258,7 +258,15 @@
         "condition": "true",
         "priority": 2,
         "actions": [
-          "data.put('visitStatus', data.get('mostRecentHHSurveyQRExists')== 'true' ? ( (data.get('mostRecentHHSurveyQRStatus') == 'yes') ? 'finished' : 'rejected') : 'not_started')"
+          "data.put('visitStatus', data.get('mostRecentHHSurveyQRExists')== 'true' ? ( (data.get('mostRecentHHSurveyQRStatus') == 'yes') ? 'visited' : 'rejected') : 'not_visited')"
+        ]
+      },
+      {
+        "name": "typeImage",
+        "condition": "true",
+        "priority": 3,
+        "actions": [
+          "data.put('typeImage', data.get('visitStatus') == 'not_visited' ? 'ic_home' : data.get('visitStatus') == 'rejected' ? 'ic_rejected' : data.get('visitStatus') == 'visited' ? 'ic_done' : 'ic_home')"
         ]
       }
     ],
@@ -271,7 +279,9 @@
       "positionLongitude": "@{positionLongitude}",
       "positionLatitude": "@{positionLatitude}",
       "familyRegistered": "@{familyRegistered}",
-      "registerFamily": "@{registerFamily}"
+      "registerFamily": "@{registerFamily}",
+      "typeImage": "@{typeImage}",
+      "type": "@{type}"
     }
   },
   "topScreenSection": {
