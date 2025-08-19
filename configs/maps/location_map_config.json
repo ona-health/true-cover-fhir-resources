@@ -452,7 +452,7 @@
                       {
                         "viewType": "BUTTON",
                         "smallSized": true,
-                        "text": "Household Survey",
+                        "text": "Fill Household Survey",
                         "status": "DUE",
                         "alignment": "CENTER",
                         "startIcon": {

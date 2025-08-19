@@ -67,22 +67,6 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
                } "r_position_data";
            } "r_loc_widget";
 
-            src -> loc.type = create("CodeableConcept") as concept then {
-                src -> concept.coding = create("Coding") as coding then {
-                    src -> coding.code = "bu" "r_building_loc_type_code";
-                    src -> coding.display = "Building" "r_building_loc_type_display";
-                    src -> coding.system = "http://terminology.hl7.org/CodeSystem/location-physical-type" "r_building_loc_type_system";
-                    } "r_building_loc_type_coding";
-            } "r_building_loc_type";
-
-            src -> loc.type = create("CodeableConcept") as concept then {
-                src -> concept.coding = create("Coding") as coding then {
-                    src -> coding.code = "5" "r_admin_level_loc_type_code";
-                    src -> coding.display = "Level 5" "r_admin_level_loc_type_display";
-                    src -> coding.system = "https://smartregister.org/codes/administrative-level" "r_admin_level_loc_type_system";
-                } "r_admin_level_loc_type_coding";
-            } "r_admin_level_loc_type_concept";
-
             src.item as parentLoc where(linkId="select-operational-area") and answer.count()>0 then {
                 src -> loc.partOf = create("Reference") as ref then {
                     src -> ref.reference = evaluate(parentLoc, $this.answer.value.reference) "r_loc_part_of";
@@ -90,31 +74,48 @@ group ExtractLocation(source src : QuestionnaireResponse, target bundle : Bundle
                 } "r_loc_part_of_ref";
             } "r_parent_location";
 
-            //Only extract Group,List and Task when household survey has been done
-            src where( item.where( linkId="was-survey-done" and answer.count() > 0 and answer.value.code = 'yes').exists() ) then {
-                // Visited location type
-                src -> loc.type = create("CodeableConcept") as concept then {
-                    src -> concept.coding = create("Coding") as coding then {
-                        src -> coding.code = "visited" "r_visited_loc_type_code";
-                        src -> coding.display = "Visited" "r_visited_loc_type_display";
-                        src -> coding.system = "http://smartregister.org/CodeSystem/true_cover-point-type" "r_visited_loc_type_system";
-                    } "r_visited_loc_type_coding";
-                } "r_visited_loc_type_concept";
-            } "r_survey_done";
-
-            // Update location type to rejected when survey is not done
-            src where( item.where( linkId="was-survey-done" and answer.count() > 0 and answer.value.code = 'no').exists() ) then {
-                // Rejected location type
-                src -> loc.type = create("CodeableConcept") as concept then {
-                    src -> concept.coding = create("Coding") as coding then {
-                        src -> coding.code = "rejected" "r_rejected_loc_type_code";
-                        src -> coding.display = "Rejected" "r_rejected_loc_type_display";
-                        src -> coding.system = "http://smartregister.org/CodeSystem/true_cover-point-type" "r_rejected_loc_type_system";
-                    } "r_rejected_loc_type_coding";
-                } "r_rejected_loc_type_concept";
-            } "r_survey_not_done";
-
         } "r_location_not_exists";
+
+        // Always extract the location types
+        src -> loc.type = create("CodeableConcept") as concept then {
+            src -> concept.coding = create("Coding") as coding then {
+                src -> coding.code = "bu" "r_building_loc_type_code";
+                src -> coding.display = "Building" "r_building_loc_type_display";
+                src -> coding.system = "http://terminology.hl7.org/CodeSystem/location-physical-type" "r_building_loc_type_system";
+                } "r_building_loc_type_coding";
+        } "r_building_loc_type";
+
+        src -> loc.type = create("CodeableConcept") as concept then {
+            src -> concept.coding = create("Coding") as coding then {
+                src -> coding.code = "5" "r_admin_level_loc_type_code";
+                src -> coding.display = "Level 5" "r_admin_level_loc_type_display";
+                src -> coding.system = "https://smartregister.org/codes/administrative-level" "r_admin_level_loc_type_system";
+            } "r_admin_level_loc_type_coding";
+        } "r_admin_level_loc_type_concept";
+
+        // Set location type to visited when survey is done
+        src where( item.where( linkId="was-survey-done" and answer.count() > 0 and answer.value.code = 'yes').exists() ) then {
+            // Visited location type
+            src -> loc.type = create("CodeableConcept") as concept then {
+                src -> concept.coding = create("Coding") as coding then {
+                    src -> coding.code = "visited" "r_visited_loc_type_code";
+                    src -> coding.display = "Visited" "r_visited_loc_type_display";
+                    src -> coding.system = "http://smartregister.org/CodeSystem/true_cover-point-type" "r_visited_loc_type_system";
+                } "r_visited_loc_type_coding";
+            } "r_visited_loc_type_concept";
+        } "r_survey_done";
+
+        // Set location type to rejected when survey is not done
+        src where( item.where( linkId="was-survey-done" and answer.count() > 0 and answer.value.code = 'no').exists() ) then {
+            // Rejected location type
+            src -> loc.type = create("CodeableConcept") as concept then {
+                src -> concept.coding = create("Coding") as coding then {
+                    src -> coding.code = "rejected" "r_rejected_loc_type_code";
+                    src -> coding.display = "Rejected" "r_rejected_loc_type_display";
+                    src -> coding.system = "http://smartregister.org/CodeSystem/true_cover-point-type" "r_rejected_loc_type_system";
+                } "r_rejected_loc_type_coding";
+            } "r_rejected_loc_type_concept";
+        } "r_survey_not_done";
 
         //Only extract Group,List and Task when household survey has been done
         src where( item.where( linkId="was-survey-done" and answer.count() > 0 and answer.value.code = 'yes').exists() ) then {
