@@ -378,6 +378,208 @@
       "required": false
     },
     {
+      "linkId": "father-education-status",
+      "type": "choice",
+      "text": "Education status of father",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "71aead36-b4ce-4c8f-8456-a0a621928c4f",
+            "code": "primary",
+            "system": "urn:uuid:1b8d5977-48b9-4b50-c15f-4a0df4b06e03",
+            "display": "Primary"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "bec12eca-478b-4870-8fdd-e14ff5a0e8c1",
+            "code": "secondary",
+            "system": "urn:uuid:1b8d5977-48b9-4b50-c15f-4a0df4b06e03",
+            "display": "Secondary"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "f20b7a73-f553-4b49-8653-cad8e0ece485",
+            "code": "university",
+            "system": "urn:uuid:1b8d5977-48b9-4b50-c15f-4a0df4b06e03",
+            "display": "University"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "1f81a245-9b11-42e2-9a35-a1c703a1c745",
+            "code": "none",
+            "system": "urn:uuid:1b8d5977-48b9-4b50-c15f-4a0df4b06e03",
+            "display": "None"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "39d80718-fc44-47ae-832e-64844e91f4e3",
+            "code": "don't-know",
+            "system": "urn:uuid:1b8d5977-48b9-4b50-c15f-4a0df4b06e03",
+            "display": "Don't Know"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "drop-down"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "mother-education-status",
+      "type": "choice",
+      "text": "Education status of mother",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "5a7a5453-d6d5-4eb0-e177-13fb90a6eb45",
+            "code": "primary",
+            "system": "urn:uuid:d5927f97-cee7-4b43-b8d9-332736393dd7",
+            "display": "Primary"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "567fc354-1df7-45e0-8932-83073ed77353",
+            "code": "secondary",
+            "system": "urn:uuid:d5927f97-cee7-4b43-b8d9-332736393dd7",
+            "display": "Secondary"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "12159d52-2907-4a57-8c26-5e5ccadfd744",
+            "code": "university",
+            "system": "urn:uuid:d5927f97-cee7-4b43-b8d9-332736393dd7",
+            "display": "University"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "fa45df37-589e-4c28-c266-c3d0a0079c98",
+            "code": "none",
+            "system": "urn:uuid:d5927f97-cee7-4b43-b8d9-332736393dd7",
+            "display": "None"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "3bccbbac-d91d-4580-8fb7-c9cfb0caad40",
+            "code": "don't-know",
+            "system": "urn:uuid:d5927f97-cee7-4b43-b8d9-332736393dd7",
+            "display": "Don't Know"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "drop-down"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "mobile-phone-ownership",
+      "type": "choice",
+      "text": "Do you own a mobile phone",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "63c3c6c6-b474-4277-d289-5e71bd992464",
+            "code": "yes",
+            "system": "urn:uuid:3f14ce4c-4d90-4350-8087-1d7817923d5b",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "5905df2e-599a-4f52-8147-ff11541e6416",
+            "code": "no",
+            "system": "urn:uuid:3f14ce4c-4d90-4350-8087-1d7817923d5b",
+            "display": "No"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "household-size",
+      "type": "integer",
+      "text": "How many people are in this household",
+      "required": false
+    },
+    {
+      "linkId": "internet-access",
+      "type": "choice",
+      "text": "Do you have access to the internet",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "cceff5ad-fe88-4518-c3c5-3eaa4e69035d",
+            "code": "yes",
+            "system": "urn:uuid:3cdc7687-8ed2-4bfa-8b7e-0baa7712eeb6",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "b6aa0a88-09a2-42f8-a34b-df7279980208",
+            "code": "no",
+            "system": "urn:uuid:3cdc7687-8ed2-4bfa-8b7e-0baa7712eeb6",
+            "display": "No"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
       "extension": [
         {
           "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",

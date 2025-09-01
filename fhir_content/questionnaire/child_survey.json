@@ -170,9 +170,115 @@
       ]
     },
     {
-      "linkId": "was-dpt3-given",
+      "linkId": "was-dpt-1-given",
       "type": "choice",
-      "text": "Was DPT3 given?",
+      "text": "Was DPT 1 given?",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "a6646ee0-9322-46aa-bc42-c27cf3ddb57e",
+            "code": "yes",
+            "system": "urn:uuid:6c68cef1-71da-4007-ae00-a3d63481cb7f",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "d9dc36a8-b7f6-494d-b63a-086589fdb126",
+            "code": "no",
+            "system": "urn:uuid:6c68cef1-71da-4007-ae00-a3d63481cb7f",
+            "display": "No"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "dpt-1-date",
+      "type": "date",
+      "text": "Date DPT 1 was given",
+      "required": false,
+      "enableWhen": [
+        {
+          "question": "was-dpt-1-given",
+          "operator": "=",
+          "answerCoding": {
+            "system": "urn:uuid:6c68cef1-71da-4007-ae00-a3d63481cb7f",
+            "code": "yes"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "was-dpt-2-given",
+      "type": "choice",
+      "text": "Was DPT 2 given?",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "3001146e-65c6-49f3-bb5a-418f191bcd6c",
+            "code": "yes",
+            "system": "urn:uuid:7cb51ce4-655f-4ca9-9396-41be230a09f3",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "12ee370f-55dc-4251-8fda-2b0124f698db",
+            "code": "no",
+            "system": "urn:uuid:7cb51ce4-655f-4ca9-9396-41be230a09f3",
+            "display": "No"
+          }
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+                "code": "radio-button"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "dpt-2-date",
+      "type": "date",
+      "text": "Date DPT 2 was given",
+      "required": false,
+      "enableWhen": [
+        {
+          "question": "was-dpt-2-given",
+          "operator": "=",
+          "answerCoding": {
+            "system": "urn:uuid:7cb51ce4-655f-4ca9-9396-41be230a09f3",
+            "code": "yes"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "was-dpt-3-given",
+      "type": "choice",
+      "text": "Was DPT 3 given?",
       "required": false,
       "answerOption": [
         {
@@ -207,13 +313,13 @@
       ]
     },
     {
-      "linkId": "dpt3-date",
+      "linkId": "dpt-3-date",
       "type": "date",
-      "text": "Date DPT3 was given",
+      "text": "Date DPT 3 was given",
       "required": false,
       "enableWhen": [
         {
-          "question": "was-dpt3-given",
+          "question": "was-dpt-3-given",
           "operator": "=",
           "answerCoding": {
             "system": "urn:uuid:ed8e60f2-8a4c-4146-8552-54da231a6c4b",
@@ -223,16 +329,16 @@
       ]
     },
     {
-      "linkId": "was-measles-vaccine-given",
+      "linkId": "was-measles-1-vaccine-given",
       "type": "choice",
-      "text": "Was Measles  vaccine given?",
+      "text": "Was Measles 1 vaccine given?",
       "required": false,
       "answerOption": [
         {
           "valueCoding": {
             "id": "e26f8853-c8ac-42ad-e59a-1d61db36c865",
             "code": "yes",
-            "system": "urn:uuid:b266fcad-180c-418c-bc33-e03deffae5a0",
+            "system": "urn:uuid:f7ae0ca7-e33a-4b7c-a45f-9b589ab11adc",
             "display": "Yes"
           }
         },
@@ -240,23 +346,63 @@
           "valueCoding": {
             "id": "df7d834b-249f-4cc2-c196-39d243e316b7",
             "code": "no",
-            "system": "urn:uuid:b266fcad-180c-418c-bc33-e03deffae5a0",
+            "system": "urn:uuid:f7ae0ca7-e33a-4b7c-a45f-9b589ab11adc",
             "display": "No"
           }
         }
       ]
     },
     {
-      "linkId": "measles-vaccine-date",
+      "linkId": "measles-1-vaccine-date",
       "type": "date",
-      "text": "Date Measles vaccine was given",
+      "text": "Date Measles 1 vaccine was given",
       "required": false,
       "enableWhen": [
         {
-          "question": "was-measles-vaccine-given",
+          "question": "was-measles-1-vaccine-given",
           "operator": "=",
           "answerCoding": {
-            "system": "urn:uuid:b266fcad-180c-418c-bc33-e03deffae5a0",
+            "system": "urn:uuid:f7ae0ca7-e33a-4b7c-a45f-9b589ab11adc",
+            "code": "yes"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "was-measles-2-vaccine-given",
+      "type": "choice",
+      "text": "Was Measles 2 vaccine given?",
+      "required": false,
+      "answerOption": [
+        {
+          "valueCoding": {
+            "id": "44d4d119-6cf7-4dd5-bb48-9fafe5a72b88",
+            "code": "yes",
+            "system": "urn:uuid:9a333b94-2cf2-418b-98a1-8dc82052dad5",
+            "display": "Yes"
+          }
+        },
+        {
+          "valueCoding": {
+            "id": "57bf3c64-7394-4613-be9e-a40afc22fdbb",
+            "code": "no",
+            "system": "urn:uuid:9a333b94-2cf2-418b-98a1-8dc82052dad5",
+            "display": "No"
+          }
+        }
+      ]
+    },
+    {
+      "linkId": "measles-2-vaccine-date",
+      "type": "date",
+      "text": "Date Measles 2 vaccine was given",
+      "required": false,
+      "enableWhen": [
+        {
+          "question": "was-measles-2-vaccine-given",
+          "operator": "=",
+          "answerCoding": {
+            "system": "urn:uuid:9a333b94-2cf2-418b-98a1-8dc82052dad5",
             "code": "yes"
           }
         }
