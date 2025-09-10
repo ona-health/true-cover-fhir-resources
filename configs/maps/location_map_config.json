@@ -268,7 +268,64 @@
         "actions": [
           "data.put('typeImage', data.get('visitStatus') == 'not_visited' ? 'ic_home' : data.get('visitStatus') == 'rejected' ? 'ic_rejected' : data.get('visitStatus') == 'visited' ? 'ic_done' : 'ic_home')"
         ]
+      },
+      {
+        "name": "distanceFromHouseholdFormattedString",
+        "condition": "true",
+        "priority": 1,
+        "actions": [
+          "data.put('distanceFromHouseholdFormattedString', locationService.calculateDistanceByGpsLocation(Location))"
+        ]
+      },
+      {
+        "name": "distanceFromHouseholdString",
+        "condition": "true",
+        "priority": 2,
+        "actions": [
+          "data.put('distanceFromHouseholdString', (data.get('distanceFromHouseholdFormattedString').split(\" \")[0]) )"
+        ]
+      },
+      {
+        "name": "distanceFromHouseholdDouble",
+        "condition": "true",
+        "priority": 3,
+        "actions": [
+          "data.put('distanceFromHouseholdDouble', (new (\"java.lang.Double\", data.get('distanceFromHouseholdString')))  )"
+        ]
+      },
+      {
+        "name": "isNearHousehold",
+        "condition": "true",
+        "priority": 4,
+        "actions": [
+          "data.put('isNearHousehold', ( data.get('distanceFromHouseholdDouble')  < 0.5 ) ? true : false )"
+        ]
+      },
+      {
+        "name": "viewRegisterFamilyForm",
+        "condition": "true",
+        "priority": 5,
+        "actions": [
+          "data.put('viewRegisterFamilyForm', data.get('registerFamily') && data.get('isNearHousehold'))"
+        ]
+      },
+      {
+        "name": "viewHouseholdProfile",
+        "condition": "true",
+        "priority": 5,
+        "actions": [
+          "data.put('viewHouseholdProfile', data.get('familyRegistered') && data.get('isNearHousehold'))"
+        ]
+      },
+      {
+        "name": "showProximityError",
+        "condition": "true",
+        "priority": 5,
+        "actions": [
+          "data.put('showProximityError', !data.get('isNearHousehold'))"
+        ]
       }
+
     ],
     "servicePointProperties": {
       "visitStatus": "@{visitStatus}",
@@ -281,7 +338,10 @@
       "familyRegistered": "@{familyRegistered}",
       "registerFamily": "@{registerFamily}",
       "typeImage": "@{typeImage}",
-      "type": "@{type}"
+      "type": "@{type}",
+      "viewRegisterFamilyForm": "@{viewRegisterFamilyForm}",
+      "viewHouseholdProfile": "@{viewHouseholdProfile}",
+      "showProximityError": "@{showProximityError}"
     }
   },
   "topScreenSection": {
@@ -427,7 +487,7 @@
                           "reference": "@{ic_home}"
                         },
                         "clickable": "@{familyRegistered}",
-                        "visible": "@{familyRegistered}",
+                        "visible": "@{viewHouseholdProfile}",
                         "fillMaxWidth": false,
                         "actions": [
                           {
@@ -460,7 +520,7 @@
                           "reference": "@{ic_home}"
                         },
                         "clickable": "@{registerFamily}",
-                        "visible": "@{registerFamily}",
+                        "visible": "@{viewRegisterFamilyForm}",
                         "fillMaxWidth": false,
                         "actions": [
                           {
@@ -496,6 +556,18 @@
                             }
                           }
                         ]
+                      },
+                      {
+                        "viewType": "SPACER",
+                        "height": 8
+                      },
+                      {
+                        "viewType": "COMPOUND_TEXT",
+                        "primaryText": "{{ proximity.error }}",
+                        "visible": "@{showProximityError}",
+                        "primaryTextFontWeight": "SEMI_BOLD",
+                        "fontSize": 14.0,
+                        "primaryTextColor": "#000000"
                       }
                     ]
                   }
