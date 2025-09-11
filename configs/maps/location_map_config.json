@@ -278,6 +278,22 @@
         ]
       },
       {
+        "name": "distanceMeasurementUnit",
+        "condition": "true",
+        "priority": 2,
+        "actions": [
+          "data.put('distanceMeasurementUnit', (data.get('distanceFromHouseholdFormattedString').split(\" \")[1]) )"
+        ]
+      },
+      {
+        "name": "maxDistanceFromHouseholdInCorrectUnits",
+        "condition": "true",
+        "priority": 3,
+        "actions": [
+          "data.put('maxDistanceFromHouseholdInCorrectUnits', (data.get('distanceMeasurementUnit') == 'km') ? 0.5 : 500 )"
+        ]
+      },
+      {
         "name": "distanceFromHouseholdString",
         "condition": "true",
         "priority": 2,
@@ -298,7 +314,7 @@
         "condition": "true",
         "priority": 4,
         "actions": [
-          "data.put('isNearHousehold', ( data.get('distanceFromHouseholdDouble')  < 0.5 ) ? true : false )"
+          "data.put('isNearHousehold', ( data.get('distanceFromHouseholdDouble')  < data.get('maxDistanceFromHouseholdInCorrectUnits') ) ? true : false )"
         ]
       },
       {
