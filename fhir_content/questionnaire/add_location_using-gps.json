@@ -55,7 +55,7 @@
       "valueExpression": {
         "name": "selected-district-name",
         "language": "text/fhirpath",
-        "expression": "iif(%district-id.exists(), %resource.descendants().where(linkId='select-district').answer.value.display, 'Operational Area')"
+        "expression": "iif(%district-id.exists(), %resource.descendants().where(linkId='select-district').answer.value.display, 'Area')"
       }
     },
     {
@@ -432,7 +432,7 @@
 
       ],
       "linkId": "select-operational-area",
-      "text": "Operational Area",
+      "text": "Area",
       "_text": {
         "extension": [
           {
